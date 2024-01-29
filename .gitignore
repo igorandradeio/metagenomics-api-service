@@ -6,3 +6,6 @@ __pycache__
 db.sqlite3
 media
 api_service/.env
+
+# venv
+venv/
