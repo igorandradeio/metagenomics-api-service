@@ -1,5 +1,5 @@
 """
-URL configuration for api_service project.
+URL configuration for core project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -17,13 +17,16 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from project import views
+from rest_framework import routers
+from project import viewsets
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-router = DefaultRouter()
-router.register(r"project", views.ProjectViewSet)
+router = routers.DefaultRouter()
+router.register(r"project", viewsets.ProjectViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/schema/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
 ]
