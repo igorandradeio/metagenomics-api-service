@@ -32,35 +32,45 @@ class SampleUploadViewSet(ViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
             files = request.FILES.getlist("file")
-            study = request.data.get("study")
-            print(study)
-            for file in files:
-                handle_uploaded_file(file, study)
+            study_id = request.data.get("study")
+            study = Study.objects.get(id=study_id)
 
+            base_dir = os.environ.get("UPLOAD_DIR")
+            upload_dir = os.path.join(base_dir, str(study_id))
+
+            # just for testing
+            remove_directory(upload_dir, study_id)
+
+            # Ensure the directory exists, if not, create it
+            os.makedirs(upload_dir, exist_ok=True)
+
+            for file in files:
+                file_saved = handle_uploaded_file(file, study_id, upload_dir)
+                if file_saved:
+                    sample = Sample(file_name=file.name, study=study, file=file_saved)
+                    sample.save()
             return Response(status=status.HTTP_201_CREATED)
 
 
-def handle_uploaded_file(file, study_id):
-    base_dir = os.environ.get("UPLOAD_DIR")
-    upload_dir = os.path.join(base_dir, str(study_id))
-
-    # just for testing
-    remove_directory(upload_dir)
-
-    # Ensure the directory exists, if not, create it
-    os.makedirs(upload_dir, exist_ok=True)
-
-    # Build the complete path for the file
-    file_path = os.path.join(upload_dir, file.name)
-
-    with open(file_path, "wb+") as destination:
-        for chunk in file.chunks():
-            destination.write(chunk)
+def handle_uploaded_file(file, study_id, upload_dir):
+    try:
+        # Build the complete path for the file
+        file_path = os.path.join(upload_dir, file.name)
+        with open(file_path, "wb+") as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        return file_path
+    except Exception as e:
+        print(f"Error saving file {file_path}: {e}")
+        return None
 
 
-def remove_directory(directory):
+def remove_directory(directory, study_id):
     # Remove the entire directory
     try:
         shutil.rmtree(directory)
+        samples_to_delete = Sample.objects.filter(study=study_id)
+        if samples_to_delete.exists():
+            samples_to_delete.delete()
     except Exception as e:
         print(f"Error removing directory {directory}: {e}")

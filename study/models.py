@@ -43,7 +43,7 @@ class Study(models.Model):
 
 class Sample(models.Model):
     file_name = models.CharField(max_length=100)
-    file = models.FileField(upload_to="samples/")
+    file = models.FileField()
     study = models.ForeignKey(Study, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
