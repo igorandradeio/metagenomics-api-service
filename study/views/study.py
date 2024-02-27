@@ -18,13 +18,14 @@ class StudyViewSet(ModelViewSet):
     queryset = Study.objects.all()
 
     def get_serializer_class(self):
-        if self.action == "list" or self.action == "retrieve":
+        if self.action == "list":
+            return StudySerializer
+        elif self.action == "retrieve":
             return StudyDetailSerializer
         return StudySerializer
 
 
-class SampleUploadViewSet(ViewSet):
-
+class SampleUploadViewSet(ModelViewSet):
     def create(self, request):
         serializer_class = SampleSerializer(data=request.data)
 
@@ -47,7 +48,11 @@ class SampleUploadViewSet(ViewSet):
             for file in files:
                 file_saved = handle_uploaded_file(file, study_id, upload_dir)
                 if file_saved:
-                    sample = Sample(file_name=file.name, study=study, file=file_saved)
+                    sample = Sample(
+                        file_name=file.name,
+                        study=study,
+                        file=file_saved.replace("core/media/", ""),
+                    )
                     sample.save()
             return Response(status=status.HTTP_201_CREATED)
 
@@ -56,6 +61,7 @@ def handle_uploaded_file(file, study_id, upload_dir):
     try:
         # Build the complete path for the file
         file_path = os.path.join(upload_dir, file.name)
+
         with open(file_path, "wb+") as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
