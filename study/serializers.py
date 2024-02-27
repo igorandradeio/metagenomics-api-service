@@ -35,19 +35,25 @@ class StudySerializer(ModelSerializer):
         fields = "__all__"
 
 
-class StudyDetailSerializer(ModelSerializer):
-    user = UserSerializer()
-    sequencing_method = SequencingNestedMethodSerializer()
-
-    class Meta:
-        model = Study
-        fields = "__all__"
-        depth = 1
-
-
 class SampleSerializer(ModelSerializer):
     file = FileField(max_length=None, allow_empty_file=False)
 
     class Meta:
         model = Sample
         fields = ["study", "file"]
+
+
+class SampleDetailSerializer(ModelSerializer):
+    class Meta:
+        model = Sample
+        fields = ["id", "study", "file"]
+
+
+class StudyDetailSerializer(ModelSerializer):
+    user = UserSerializer()
+    sequencing_method = SequencingNestedMethodSerializer()
+    samples = SampleDetailSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Study
+        fields = "__all__"
