@@ -51,7 +51,7 @@ class SampleUploadViewSet(ModelViewSet):
                     sample = Sample(
                         file_name=file.name,
                         study=study,
-                        file=file_saved.replace("core/media/", ""),
+                        file=file_saved.replace("api/media/", ""),
                     )
                     sample.save()
             return Response(status=status.HTTP_201_CREATED)
