@@ -5,24 +5,24 @@ from rest_framework import status
 import os
 import shutil
 
-from study.models import Study, Sample
-from study.serializers import (
-    StudySerializer,
-    StudyDetailSerializer,
+from project.models import Project, Sample
+from project.serializers import (
+    ProjectSerializer,
+    ProjectDetailSerializer,
     SampleSerializer,
 )
 
 
-class StudyViewSet(ModelViewSet):
+class ProjectViewSet(ModelViewSet):
 
-    queryset = Study.objects.all()
+    queryset = Project.objects.all()
 
     def get_serializer_class(self):
         if self.action == "list":
-            return StudySerializer
+            return ProjectSerializer
         elif self.action == "retrieve":
-            return StudyDetailSerializer
-        return StudySerializer
+            return ProjectDetailSerializer
+        return ProjectSerializer
 
 
 class SampleUploadViewSet(ModelViewSet):
@@ -33,31 +33,31 @@ class SampleUploadViewSet(ModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
             files = request.FILES.getlist("file")
-            study_id = request.data.get("study")
-            study = Study.objects.get(id=study_id)
+            project_id = request.data.get("project")
+            project = Project.objects.get(id=project_id)
 
             base_dir = os.environ.get("UPLOAD_DIR")
-            upload_dir = os.path.join(base_dir, str(study_id))
+            upload_dir = os.path.join(base_dir, str(project_id))
 
             # just for testing
-            remove_directory(upload_dir, study_id)
+            remove_directory(upload_dir, project_id)
 
             # Ensure the directory exists, if not, create it
             os.makedirs(upload_dir, exist_ok=True)
 
             for file in files:
-                file_saved = handle_uploaded_file(file, study_id, upload_dir)
+                file_saved = handle_uploaded_file(file, project_id, upload_dir)
                 if file_saved:
                     sample = Sample(
                         file_name=file.name,
-                        study=study,
+                        project=project,
                         file=file_saved.replace("api/media/", ""),
                     )
                     sample.save()
             return Response(status=status.HTTP_201_CREATED)
 
 
-def handle_uploaded_file(file, study_id, upload_dir):
+def handle_uploaded_file(file, project_id, upload_dir):
     try:
         # Build the complete path for the file
         file_path = os.path.join(upload_dir, file.name)
@@ -71,11 +71,11 @@ def handle_uploaded_file(file, study_id, upload_dir):
         return None
 
 
-def remove_directory(directory, study_id):
+def remove_directory(directory, project_id):
     # Remove the entire directory
     try:
         shutil.rmtree(directory)
-        samples_to_delete = Sample.objects.filter(study=study_id)
+        samples_to_delete = Sample.objects.filter(project=project_id)
         if samples_to_delete.exists():
             samples_to_delete.delete()
     except Exception as e:

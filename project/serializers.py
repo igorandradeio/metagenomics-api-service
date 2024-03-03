@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer, FileField
 
-from .models import Country, SequencingMethod, Study, Sample
+from .models import Country, SequencingMethod, Project, Sample
 from django.contrib.auth.models import User
 import os
 
@@ -29,9 +29,9 @@ class SequencingNestedMethodSerializer(ModelSerializer):
         fields = ["id", "name"]
 
 
-class StudySerializer(ModelSerializer):
+class ProjectSerializer(ModelSerializer):
     class Meta:
-        model = Study
+        model = Project
         fields = "__all__"
 
 
@@ -40,20 +40,20 @@ class SampleSerializer(ModelSerializer):
 
     class Meta:
         model = Sample
-        fields = ["study", "file"]
+        fields = ["project", "file"]
 
 
 class SampleDetailSerializer(ModelSerializer):
     class Meta:
         model = Sample
-        fields = ["id", "study", "file"]
+        fields = ["id", "project", "file"]
 
 
-class StudyDetailSerializer(ModelSerializer):
+class ProjectDetailSerializer(ModelSerializer):
     user = UserSerializer()
     sequencing_method = SequencingNestedMethodSerializer()
     samples = SampleDetailSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Study
+        model = Project
         fields = "__all__"

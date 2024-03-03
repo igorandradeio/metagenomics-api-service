@@ -27,8 +27,8 @@ class SequencingMethod(models.Model):
         return self.name
 
 
-# Study
-class Study(models.Model):
+# Project
+class Project(models.Model):
     name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="studies")
     sequencing_method = models.ForeignKey(SequencingMethod, on_delete=models.PROTECT)
@@ -44,7 +44,9 @@ class Study(models.Model):
 class Sample(models.Model):
     file_name = models.CharField(max_length=100)
     file = models.FileField()
-    study = models.ForeignKey(Study, on_delete=models.CASCADE, related_name="samples")
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="samples"
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
