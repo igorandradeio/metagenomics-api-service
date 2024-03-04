@@ -1,5 +1,5 @@
 """
-URL configuration for api_service project.
+URL configuration for the project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -17,13 +17,23 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
-from project import views
+from project.views import ProjectViewSet, SampleUploadViewSet
+from django.conf import settings
+from django.conf.urls.static import static
 
 router = DefaultRouter()
-router.register(r"project", views.ProjectViewSet)
+
+router.register(r"project", ProjectViewSet)
+router.register(r"sample-upload", SampleUploadViewSet, basename="sample-upload")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/schema/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
     path("api/", include(router.urls)),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
