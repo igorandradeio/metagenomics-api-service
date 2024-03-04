@@ -1,0 +1,9 @@
+[
+    {
+        "model": "project.sequencingmethod",
+        "pk": 1,
+        "fields": {
+            "name": "ILLUMINA"
+        }
+    }
+]

@@ -1,0 +1,16 @@
+[
+    {
+        "model": "project.sequencingreadtype",
+        "pk": 1,
+        "fields": {
+            "name": "Single-read"
+        }
+    },
+    {
+        "model": "project.sequencingreadtype",
+        "pk": 2,
+        "fields": {
+            "name": "Paired-end"
+        }
+    }
+]
