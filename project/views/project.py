@@ -1,7 +1,8 @@
-from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 import os
 import shutil
 
@@ -14,6 +15,8 @@ from project.serializers import (
 
 
 class ProjectViewSet(ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     queryset = Project.objects.all()
 
@@ -26,6 +29,9 @@ class ProjectViewSet(ModelViewSet):
 
 
 class SampleUploadViewSet(ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def create(self, request):
         serializer_class = SampleSerializer(data=request.data)
 
