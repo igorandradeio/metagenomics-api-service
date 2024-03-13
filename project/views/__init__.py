@@ -1,2 +1,2 @@
 from .project import ProjectViewSet
-from .project import SampleUploadViewSet
+from .sample import SampleUploadViewSet
