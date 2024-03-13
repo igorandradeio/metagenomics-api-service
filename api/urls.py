@@ -19,13 +19,13 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
-from project.views import ProjectViewSet, SampleUploadViewSet
+from project.views import SampleUploadViewSet, ProjectViewSet
 from django.conf import settings
 from django.conf.urls.static import static
 
 router = DefaultRouter()
 
-router.register(r"project", ProjectViewSet)
+router.register(r"project", ProjectViewSet, basename="project")
 router.register(r"sample-upload", SampleUploadViewSet, basename="sample-upload")
 
 urlpatterns = [

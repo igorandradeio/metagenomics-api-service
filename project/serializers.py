@@ -1,4 +1,8 @@
-from rest_framework.serializers import ModelSerializer, FileField
+from rest_framework.serializers import (
+    ModelSerializer,
+    FileField,
+    PrimaryKeyRelatedField,
+)
 
 from .models import Country, SequencingMethod, Project, Sample
 from django.contrib.auth.models import User
@@ -30,9 +34,16 @@ class SequencingNestedMethodSerializer(ModelSerializer):
 
 
 class ProjectSerializer(ModelSerializer):
+    user = PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Project
-        fields = "__all__"
+        fields = ["id", "name", "sequencing_method", "sequencing_read_type", "user"]
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        project = Project.objects.create(user=user, **validated_data)
+        return project
 
 
 class SampleSerializer(ModelSerializer):
