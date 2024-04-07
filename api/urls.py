@@ -33,7 +33,7 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/schema/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
     path("api/", include(router.urls)),
-    path("api/auth/", include("authentication.urls")),
+    path("api/", include("authentication.urls")),
 ]
 
 if settings.DEBUG:
