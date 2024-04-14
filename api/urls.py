@@ -19,7 +19,12 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
-from project.views import SampleUploadViewSet, ProjectViewSet
+from project.views import (
+    SampleUploadViewSet,
+    ProjectViewSet,
+    SequencingMethodViewSet,
+    SequencingReadTypeViewSet,
+)
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -27,7 +32,12 @@ router = DefaultRouter()
 
 router.register(r"project", ProjectViewSet, basename="project")
 router.register(r"sample-upload", SampleUploadViewSet, basename="sample-upload")
-
+router.register(
+    r"sequencing-method", SequencingMethodViewSet, basename="sequencing-method"
+)
+router.register(
+    r"sequencing-read-type", SequencingReadTypeViewSet, basename="sequencing-read-type"
+)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
