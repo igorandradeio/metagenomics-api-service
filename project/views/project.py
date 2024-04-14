@@ -24,5 +24,5 @@ class ProjectViewSet(ModelViewSet):
 
     def retrieve(self, request, pk):
         project = get_object_or_404(Project, pk=pk, user=request.user)
-        serializer = ProjectSerializer(project)
+        serializer = ProjectDetailSerializer(project)
         return Response(serializer.data)

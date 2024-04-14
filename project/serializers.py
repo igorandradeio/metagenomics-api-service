@@ -1,44 +1,56 @@
-from rest_framework.serializers import (
-    ModelSerializer,
-    FileField,
-    PrimaryKeyRelatedField,
-)
+from rest_framework import serializers
 
-from .models import Country, SequencingMethod, Project, Sample
+from .models import Country, SequencingMethod, Project, Sample, SequencingReadType
 from django.contrib.auth.models import User
 import os
 
 
-class UserSerializer(ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username"]
 
 
-class CountrySerializer(ModelSerializer):
+class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = "__all__"
 
 
-class SequencingMethodSerializer(ModelSerializer):
+class SequencingMethodSerializer(serializers.ModelSerializer):
     class Meta:
         model = SequencingMethod
         fields = "__all__"
 
 
-class SequencingNestedMethodSerializer(ModelSerializer):
+class SequencingNestedMethodSerializer(serializers.ModelSerializer):
     class Meta:
         model = SequencingMethod
         fields = ["id", "name"]
 
 
-class ProjectSerializer(ModelSerializer):
-    user = PrimaryKeyRelatedField(read_only=True)
+class SequencingReadTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SequencingReadType
+        fields = "__all__"
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    date = serializers.DateTimeField(
+        source="created_at", read_only=True, format="%d-%m-%Y"
+    )
 
     class Meta:
         model = Project
-        fields = ["id", "name", "sequencing_method", "sequencing_read_type", "user"]
+        fields = [
+            "id",
+            "name",
+            "sequencing_method",
+            "sequencing_read_type",
+            "user",
+            "date",
+        ]
 
     def create(self, validated_data):
         user = self.context["request"].user
@@ -46,21 +58,21 @@ class ProjectSerializer(ModelSerializer):
         return project
 
 
-class SampleSerializer(ModelSerializer):
-    file = FileField(max_length=None, allow_empty_file=False)
+class SampleSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(max_length=None, allow_empty_file=False)
 
     class Meta:
         model = Sample
         fields = ["project", "file"]
 
 
-class SampleDetailSerializer(ModelSerializer):
+class SampleDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
         fields = ["id", "project", "file"]
 
 
-class ProjectDetailSerializer(ModelSerializer):
+class ProjectDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     sequencing_method = SequencingNestedMethodSerializer()
     samples = SampleDetailSerializer(many=True, read_only=True)

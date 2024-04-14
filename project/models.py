@@ -34,7 +34,7 @@ class SequencingMethod(models.Model):
 # Project
 class Project(models.Model):
     name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="studies")
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="projects")
     sequencing_method = models.ForeignKey(SequencingMethod, on_delete=models.PROTECT)
     sequencing_read_type = models.ForeignKey(
         SequencingReadType, on_delete=models.PROTECT
