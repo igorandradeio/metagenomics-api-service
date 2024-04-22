@@ -18,9 +18,12 @@ class CountrySerializer(serializers.ModelSerializer):
 
 
 class SequencingMethodSerializer(serializers.ModelSerializer):
+    value = serializers.IntegerField(source="id")
+    label = serializers.CharField(source="name")
+
     class Meta:
         model = SequencingMethod
-        fields = "__all__"
+        fields = ["value", "label"]
 
 
 class SequencingNestedMethodSerializer(serializers.ModelSerializer):
@@ -30,9 +33,12 @@ class SequencingNestedMethodSerializer(serializers.ModelSerializer):
 
 
 class SequencingReadTypeSerializer(serializers.ModelSerializer):
+    value = serializers.IntegerField(source="id")
+    label = serializers.CharField(source="name")
+
     class Meta:
         model = SequencingReadType
-        fields = "__all__"
+        fields = ["value", "label"]
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -66,15 +72,22 @@ class SampleSerializer(serializers.ModelSerializer):
         fields = ["project", "file"]
 
 
+class AssemblySerializer(serializers.ModelSerializer):
+    file = serializers.FileField(max_length=None, allow_empty_file=False)
+
+    class Meta:
+        model = Sample
+        fields = ["project", "file"]
+
+
 class SampleDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
-        fields = ["id", "project", "file"]
+        fields = ["id", "project", "file_path"]
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    sequencing_method = SequencingNestedMethodSerializer()
     samples = SampleDetailSerializer(many=True, read_only=True)
 
     class Meta:

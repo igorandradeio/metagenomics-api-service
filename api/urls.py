@@ -21,6 +21,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 from project.views import (
     SampleUploadViewSet,
+    AssemblyUploadViewSet,
     ProjectViewSet,
     SequencingMethodViewSet,
     SequencingReadTypeViewSet,
@@ -32,6 +33,8 @@ router = DefaultRouter()
 
 router.register(r"project", ProjectViewSet, basename="project")
 router.register(r"sample-upload", SampleUploadViewSet, basename="sample-upload")
+router.register(r"assembly-upload", AssemblyUploadViewSet, basename="assembly-upload")
+
 router.register(
     r"sequencing-method", SequencingMethodViewSet, basename="sequencing-method"
 )

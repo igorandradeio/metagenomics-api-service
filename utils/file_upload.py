@@ -4,14 +4,13 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 import os
-from utils.handle_uploaded_file import handle_uploaded_file
-from utils.remove_directory import remove_directory
+import shutil
 
 from project.models import Project, Sample
 from project.serializers import SampleSerializer
 
 
-class SampleUploadViewSet(ModelViewSet):
+class FileUploadViewSet(ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -26,7 +25,7 @@ class SampleUploadViewSet(ModelViewSet):
             project = Project.objects.get(id=project_id)
 
             base_dir = os.environ.get("UPLOAD_DIR")
-            upload_dir = os.path.join(base_dir, str(project_id), "sample")
+            upload_dir = os.path.join(base_dir, str(project_id))
 
             # just for testing
             remove_directory(upload_dir, project_id)
@@ -44,3 +43,28 @@ class SampleUploadViewSet(ModelViewSet):
                     )
                     sample.save()
             return Response(status=status.HTTP_201_CREATED)
+
+
+def handle_uploaded_file(file, project_id, upload_dir):
+    try:
+        # Build the complete path for the file
+        file_path = os.path.join(upload_dir, file.name)
+
+        with open(file_path, "wb+") as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        return file_path
+    except Exception as e:
+        print(f"Error saving file {file_path}: {e}")
+        return None
+
+
+def remove_directory(directory, project_id):
+    # Remove the entire directory
+    try:
+        shutil.rmtree(directory)
+        samples_to_delete = Sample.objects.filter(project=project_id)
+        if samples_to_delete.exists():
+            samples_to_delete.delete()
+    except Exception as e:
+        print(f"Error removing directory {directory}: {e}")

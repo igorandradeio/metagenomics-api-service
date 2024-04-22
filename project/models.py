@@ -49,10 +49,25 @@ class Project(models.Model):
 
 
 class Sample(models.Model):
-    file_name = models.CharField(max_length=100)
-    file = models.FileField()
+    file_name = models.CharField(max_length=256)
+    file_path = models.FileField()
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name="samples"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.file_name
+
+
+class Assembly(models.Model):
+    file_name = models.CharField(max_length=256)
+    file_path = models.FileField()
+    project = models.OneToOneField(
+        Project, on_delete=models.CASCADE, related_name="assembly"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
