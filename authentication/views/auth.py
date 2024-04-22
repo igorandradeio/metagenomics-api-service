@@ -26,7 +26,7 @@ def login(request):
     user = User.objects.filter(email=request.data["email"]).first()
 
     if not user:
-        return Response("User not found", status=status.HTTP_401_UNAUTHORIZED)
+        return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
     if not user.check_password(request.data["password"]):
         return Response("Incorrect password", status=status.HTTP_401_UNAUTHORIZED)
