@@ -8,22 +8,28 @@ from utils.handle_uploaded_file import handle_uploaded_file
 from utils.remove_directory import remove_directory
 
 from project.models import Project, Sample
-from project.serializers import SampleSerializer
+from project.serializers import SampleListSerializer
+from django.shortcuts import get_object_or_404
 
 
-class SampleUploadViewSet(ModelViewSet):
+class SampleViewSet(ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def create(self, request):
-        serializer_class = SampleSerializer(data=request.data)
+    def samples_by_project(self, request, project_id):
+        project_id = project_id
+        project = get_object_or_404(Project, pk=project_id, user=request.user)
+        queryset = project.samples.all()
+        serializer = SampleListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
-        if "file" not in request.FILES or not serializer_class.is_valid():
+    def create(self, request):
+        if "file" not in request.FILES:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
             files = request.FILES.getlist("file")
             project_id = request.data.get("project")
-            project = Project.objects.get(id=project_id)
+            project = get_object_or_404(Project, pk=project_id, user=request.user)
 
             base_dir = os.environ.get("UPLOAD_DIR")
             upload_dir = os.path.join(base_dir, str(project_id), "sample")

@@ -7,7 +7,7 @@ import os
 import shutil
 
 from project.models import Project, Sample
-from project.serializers import SampleSerializer
+from project.serializers import SampleSerializer, SampleListSerializer
 
 
 class FileUploadViewSet(ModelViewSet):

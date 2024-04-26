@@ -46,6 +46,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(
         source="created_at", read_only=True, format="%d-%m-%Y"
     )
+    sample_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -56,7 +57,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             "sequencing_read_type",
             "user",
             "date",
+            "sample_count",
         ]
+
+    def get_sample_count(self, obj):
+        return obj.samples.count()
 
     def create(self, validated_data):
         user = self.context["request"].user
@@ -64,12 +69,21 @@ class ProjectSerializer(serializers.ModelSerializer):
         return project
 
 
-class SampleSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(max_length=None, allow_empty_file=False)
+class SampleListSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(
+        source="created_at", read_only=True, format="%d-%m-%Y"
+    )
 
     class Meta:
         model = Sample
-        fields = ["project", "file"]
+        fields = ["id", "project_id", "file_name", "file_path", "date"]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        base_url = os.environ.get("BASE_URL")
+
+        representation["file_path"] = base_url + instance.file_path.url
+        return representation
 
 
 class AssemblySerializer(serializers.ModelSerializer):
