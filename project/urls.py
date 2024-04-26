@@ -1,0 +1,34 @@
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from project.views import (
+    SampleViewSet,
+    AssemblyUploadViewSet,
+    ProjectViewSet,
+    SequencingMethodViewSet,
+    SequencingReadTypeViewSet,
+)
+
+app_name = "project"
+
+router = DefaultRouter()
+
+router.register(r"project", ProjectViewSet, basename="project")
+router.register(r"sample", SampleViewSet, basename="sample")
+router.register(r"assembly-upload", AssemblyUploadViewSet, basename="assembly-upload")
+
+router.register(
+    r"sequencing-method", SequencingMethodViewSet, basename="sequencing-method"
+)
+router.register(
+    r"sequencing-read-type", SequencingReadTypeViewSet, basename="sequencing-read-type"
+)
+
+urlpatterns = [
+    path("", include(router.urls)),
+    path(
+        "/sample/<int:project_id>/samples/",
+        SampleViewSet.as_view(actions={"get": "samples_by_project"}),
+        name="samples-by-project",
+    ),
+]

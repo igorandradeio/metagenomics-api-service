@@ -18,35 +18,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from rest_framework.routers import DefaultRouter
-from project.views import (
-    SampleUploadViewSet,
-    AssemblyUploadViewSet,
-    ProjectViewSet,
-    SequencingMethodViewSet,
-    SequencingReadTypeViewSet,
-)
+
 from django.conf import settings
 from django.conf.urls.static import static
 
-router = DefaultRouter()
-
-router.register(r"project", ProjectViewSet, basename="project")
-router.register(r"sample-upload", SampleUploadViewSet, basename="sample-upload")
-router.register(r"assembly-upload", AssemblyUploadViewSet, basename="assembly-upload")
-
-router.register(
-    r"sequencing-method", SequencingMethodViewSet, basename="sequencing-method"
-)
-router.register(
-    r"sequencing-read-type", SequencingReadTypeViewSet, basename="sequencing-read-type"
-)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/schema/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
-    path("api/", include(router.urls)),
     path("api/", include("authentication.urls")),
+    path("api/", include("project.urls")),
 ]
 
 if settings.DEBUG:
