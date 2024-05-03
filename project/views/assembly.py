@@ -35,13 +35,21 @@ class AssemblyUploadViewSet(ModelViewSet):
             os.makedirs(upload_dir, exist_ok=True)
 
             file_saved = handle_uploaded_file(file, project_id, upload_dir)
+
             if file_saved:
                 assembly = Assembly(
                     file_name=file.name,
                     project=project,
-                    file_path=file_saved.replace("api/media/", ""),
+                    file=file_saved.replace("api/media/", ""),
                 )
                 assembly.save()
-            return Response(status=status.HTTP_201_CREATED)
+                return Response(status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    {"error": "Error saving file"}, status=status.HTTP_400_BAD_REQUEST
+                )
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid file"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

@@ -29,6 +29,3 @@ urlpatterns = [
     path("api/", include("authentication.urls")),
     path("api/", include("project.urls")),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

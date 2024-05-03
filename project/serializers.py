@@ -73,17 +73,15 @@ class SampleListSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(
         source="created_at", read_only=True, format="%d-%m-%Y"
     )
+    download = serializers.SerializerMethodField()
 
     class Meta:
         model = Sample
-        fields = ["id", "project_id", "file_name", "file_path", "date"]
+        fields = ["id", "project_id", "file_name", "download", "date"]
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
+    def get_download(self, obj):
         base_url = os.environ.get("BASE_URL")
-
-        representation["file_path"] = base_url + instance.file_path.url
-        return representation
+        return f"{base_url}/api/samples/{obj.pk}/download/"
 
 
 class AssemblySerializer(serializers.ModelSerializer):
@@ -97,7 +95,13 @@ class AssemblySerializer(serializers.ModelSerializer):
 class SampleDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
-        fields = ["id", "project", "file_path"]
+        fields = ["id", "project", "file"]
+
+
+class SampleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sample
+        fields = ["id", "file"]
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):

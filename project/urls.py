@@ -27,8 +27,13 @@ router.register(
 urlpatterns = [
     path("", include(router.urls)),
     path(
-        "/sample/<int:project_id>/samples/",
+        "project/<int:project_id>/samples/",
         SampleViewSet.as_view(actions={"get": "samples_by_project"}),
         name="samples-by-project",
+    ),
+    path(
+        "samples/<int:sample_id>/download/",
+        SampleViewSet.as_view(actions={"get": "download_sample"}),
+        name="download_sample",
     ),
 ]

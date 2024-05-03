@@ -49,11 +49,15 @@ class Project(models.Model):
 
 
 class Sample(models.Model):
+
+    READ_ORIENTATION_CHOICES = [(1, "Forward"), (2, "Reverse")]
+
     file_name = models.CharField(max_length=256)
-    file_path = models.FileField()
+    file = models.FileField()
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name="samples"
     )
+    read_orientation = models.IntegerField(choices=READ_ORIENTATION_CHOICES, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -65,7 +69,7 @@ class Sample(models.Model):
 
 class Assembly(models.Model):
     file_name = models.CharField(max_length=256)
-    file_path = models.FileField()
+    file = models.FileField()
     project = models.OneToOneField(
         Project, on_delete=models.CASCADE, related_name="assembly"
     )
