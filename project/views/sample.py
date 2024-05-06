@@ -5,7 +5,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 import os
 from utils.handle_uploaded_file import handle_uploaded_file
-from utils.remove_directory import remove_directory
+from utils.remove_directory import remove_sample_directory
 
 from project.models import Project, Sample
 from project.serializers import SampleListSerializer
@@ -43,7 +43,7 @@ class SampleViewSet(ModelViewSet):
             base_dir = os.environ.get("UPLOAD_DIR")
             upload_dir = os.path.join(base_dir, str(project_id), "sample")
 
-            remove_directory(upload_dir, project_id)
+            remove_sample_directory(upload_dir, project_id)
             os.makedirs(upload_dir, exist_ok=True)
 
             r1_saved = handle_uploaded_file(r1, project_id, upload_dir)
@@ -77,7 +77,7 @@ class SampleViewSet(ModelViewSet):
             base_dir = os.environ.get("UPLOAD_DIR")
             upload_dir = os.path.join(base_dir, str(project_id), "sample")
 
-            remove_directory(upload_dir, project_id)
+            remove_sample_directory(upload_dir, project_id)
             os.makedirs(upload_dir, exist_ok=True)
 
             file_saved = handle_uploaded_file(file, project_id, upload_dir)

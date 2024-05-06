@@ -5,7 +5,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 import os
 from utils.handle_uploaded_file import handle_uploaded_file
-from utils.remove_directory import remove_directory
+from utils.remove_directory import remove_assembly_directory
 
 from project.models import Project, Assembly
 from project.serializers import AssemblySerializer, AssemblyListSerializer
@@ -40,7 +40,7 @@ class AssemblyViewSet(ModelViewSet):
             upload_dir = os.path.join(base_dir, str(project_id), "assembly")
 
             # just for testing
-            remove_directory(upload_dir, project_id)
+            remove_assembly_directory(upload_dir, project_id)
 
             # Ensure the directory exists, if not, create it
             os.makedirs(upload_dir, exist_ok=True)
