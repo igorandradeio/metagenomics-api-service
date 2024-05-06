@@ -20,9 +20,12 @@ class SampleViewSet(ModelViewSet):
     def samples_by_project(self, request, project_id):
         project_id = project_id
         project = get_object_or_404(Project, pk=project_id, user=request.user)
-        queryset = project.samples.all()
-        serializer = SampleListSerializer(queryset, many=True)
-        return Response(serializer.data)
+        try:
+            queryset = project.samples.all()
+            serializer = SampleListSerializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def download_sample(self, request, sample_id):
         sample = get_object_or_404(Sample, id=sample_id)

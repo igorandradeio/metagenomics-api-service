@@ -8,12 +8,23 @@ from utils.handle_uploaded_file import handle_uploaded_file
 from utils.remove_directory import remove_directory
 
 from project.models import Project, Assembly
-from project.serializers import AssemblySerializer
+from project.serializers import AssemblySerializer, AssemblyListSerializer
+from django.shortcuts import get_object_or_404
 
 
-class AssemblyUploadViewSet(ModelViewSet):
+class AssemblyViewSet(ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def assembly_by_project(self, request, project_id):
+        project_id = project_id
+        project = get_object_or_404(Project, pk=project_id, user=request.user)
+        try:
+            queryset = project.assembly
+            serializer = AssemblyListSerializer(queryset, many=False)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
         serializer_class = AssemblySerializer(data=request.data)

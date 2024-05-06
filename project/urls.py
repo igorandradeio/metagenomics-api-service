@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from project.views import (
     SampleViewSet,
-    AssemblyUploadViewSet,
+    AssemblyViewSet,
     ProjectViewSet,
     SequencingMethodViewSet,
     SequencingReadTypeViewSet,
@@ -15,7 +15,7 @@ router = DefaultRouter()
 
 router.register(r"project", ProjectViewSet, basename="project")
 router.register(r"sample", SampleViewSet, basename="sample")
-router.register(r"assembly-upload", AssemblyUploadViewSet, basename="assembly-upload")
+router.register(r"assembly", AssemblyViewSet, basename="assembly")
 
 router.register(
     r"sequencing-method", SequencingMethodViewSet, basename="sequencing-method"
@@ -30,6 +30,11 @@ urlpatterns = [
         "project/<int:project_id>/samples/",
         SampleViewSet.as_view(actions={"get": "samples_by_project"}),
         name="samples-by-project",
+    ),
+    path(
+        "project/<int:project_id>/assembly/",
+        AssemblyViewSet.as_view(actions={"get": "assembly_by_project"}),
+        name="assembly-by-project",
     ),
     path(
         "samples/<int:sample_id>/download/",
