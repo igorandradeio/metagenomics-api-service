@@ -19,11 +19,12 @@ class AssemblyViewSet(ModelViewSet):
     def assembly_by_project(self, request, project_id):
         project_id = project_id
         project = get_object_or_404(Project, pk=project_id, user=request.user)
+
         try:
-            queryset = project.assembly
-            serializer = AssemblyListSerializer(queryset, many=False)
+            assembly = project.assembly
+            serializer = AssemblyListSerializer(assembly)
             return Response(serializer.data)
-        except Exception as e:
+        except Assembly.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
