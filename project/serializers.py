@@ -1,57 +1,126 @@
-from rest_framework.serializers import ModelSerializer, FileField
+from rest_framework import serializers
 
-from .models import Country, SequencingMethod, Project, Sample
+from .models import Country, SequencingMethod, Project, Sample, SequencingReadType
 from django.contrib.auth.models import User
 import os
 
 
-class UserSerializer(ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username"]
 
 
-class CountrySerializer(ModelSerializer):
+class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = "__all__"
 
 
-class SequencingMethodSerializer(ModelSerializer):
+class SequencingMethodSerializer(serializers.ModelSerializer):
+    value = serializers.IntegerField(source="id")
+    label = serializers.CharField(source="name")
+
     class Meta:
         model = SequencingMethod
-        fields = "__all__"
+        fields = ["value", "label"]
 
 
-class SequencingNestedMethodSerializer(ModelSerializer):
+class SequencingNestedMethodSerializer(serializers.ModelSerializer):
     class Meta:
         model = SequencingMethod
         fields = ["id", "name"]
 
 
-class ProjectSerializer(ModelSerializer):
+class SequencingReadTypeSerializer(serializers.ModelSerializer):
+    value = serializers.IntegerField(source="id")
+    label = serializers.CharField(source="name")
+
+    class Meta:
+        model = SequencingReadType
+        fields = ["value", "label"]
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    date = serializers.DateTimeField(
+        source="created_at", read_only=True, format="%d-%m-%Y"
+    )
+    sample_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Project
-        fields = "__all__"
+        fields = [
+            "id",
+            "name",
+            "sequencing_method",
+            "sequencing_read_type",
+            "user",
+            "date",
+            "sample_count",
+        ]
+
+    def get_sample_count(self, obj):
+        return obj.samples.count()
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        project = Project.objects.create(user=user, **validated_data)
+        return project
 
 
-class SampleSerializer(ModelSerializer):
-    file = FileField(max_length=None, allow_empty_file=False)
+class SampleListSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(
+        source="created_at", read_only=True, format="%d-%m-%Y"
+    )
+    download = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Sample
+        fields = ["id", "project_id", "file_name", "download", "date"]
+
+    def get_download(self, obj):
+        base_url = os.environ.get("BASE_URL")
+        return f"{base_url}/api/samples/{obj.pk}/download/"
+
+
+class AssemblyListSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(
+        source="created_at", read_only=True, format="%d-%m-%Y"
+    )
+    download = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Sample
+        fields = ["id", "project_id", "file_name", "download", "date"]
+
+    def get_download(self, obj):
+        base_url = os.environ.get("BASE_URL")
+        return f"{base_url}/api/assembly/{obj.pk}/download/"
+
+
+class AssemblySerializer(serializers.ModelSerializer):
+    file = serializers.FileField(max_length=None, allow_empty_file=False)
 
     class Meta:
         model = Sample
         fields = ["project", "file"]
 
 
-class SampleDetailSerializer(ModelSerializer):
+class SampleDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
         fields = ["id", "project", "file"]
 
 
-class ProjectDetailSerializer(ModelSerializer):
+class SampleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sample
+        fields = ["id", "file"]
+
+
+class ProjectDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    sequencing_method = SequencingNestedMethodSerializer()
     samples = SampleDetailSerializer(many=True, read_only=True)
 
     class Meta:
