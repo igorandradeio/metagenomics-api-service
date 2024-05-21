@@ -12,7 +12,6 @@ def register(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         user = User(
-            username=request.data["username"],
             email=request.data["email"],
             first_name=request.data["first_name"],
             last_name=request.data["last_name"],
