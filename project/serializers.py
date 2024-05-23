@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
 from .models import Country, SequencingMethod, Project, Sample, SequencingReadType
-from django.contrib.auth.models import User
+from user.models import User
 import os
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username"]
+        fields = ["id"]
 
 
 class CountrySerializer(serializers.ModelSerializer):

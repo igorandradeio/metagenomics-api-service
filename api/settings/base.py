@@ -46,7 +46,10 @@ INSTALLED_APPS = [
     # Internal Apps
     "project",
     "authentication",
+    "user",
 ]
+
+AUTH_USER_MODEL = "user.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
