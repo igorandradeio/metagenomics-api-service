@@ -4,7 +4,7 @@ from user.models import User
 
 # Country
 class Country(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=255, unique=True)
     code = models.CharField(max_length=2, unique=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -17,7 +17,7 @@ class Country(models.Model):
 
 # Sequencing Read Types
 class SequencingReadType(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
@@ -25,7 +25,7 @@ class SequencingReadType(models.Model):
 
 # Sequencing Method
 class SequencingMethod(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
@@ -33,7 +33,7 @@ class SequencingMethod(models.Model):
 
 # Project
 class Project(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="projects")
     sequencing_method = models.ForeignKey(SequencingMethod, on_delete=models.PROTECT)
     sequencing_read_type = models.ForeignKey(
@@ -52,7 +52,7 @@ class Sample(models.Model):
 
     READ_ORIENTATION_CHOICES = [(1, "Forward"), (2, "Reverse")]
 
-    file_name = models.CharField(max_length=256)
+    file_name = models.CharField(max_length=255)
     file = models.FileField()
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name="samples"
@@ -68,7 +68,7 @@ class Sample(models.Model):
 
 
 class Assembly(models.Model):
-    file_name = models.CharField(max_length=256)
+    file_name = models.CharField(max_length=255)
     file = models.FileField()
     project = models.OneToOneField(
         Project, on_delete=models.CASCADE, related_name="assembly"
