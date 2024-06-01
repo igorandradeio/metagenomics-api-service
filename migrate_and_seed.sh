@@ -3,10 +3,10 @@
 # Generate migrations
 poetry run python manage.py makemigrations
 
-# Run migrations
+# Apply migrations 
 poetry run python manage.py migrate
 
-# Run seeders 
+# Load initial data into the database from seed files
 fixtures=$(ls seed/)
 while IFS= read -r fixture; do
     echo -n "Seeding "
