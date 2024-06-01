@@ -1,0 +1,44 @@
+services:
+  # image project
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    volumes:
+      - .:/app
+    ports:
+      - ${DJANGO_PORT}:8000
+    expose:
+      - 8000
+    command: "poetry run python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - backend-network
+    depends_on:
+      - db
+
+  # db mysql
+  db:
+    container_name: db
+    image: mysql:8.0.20
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    volumes:
+      - mysqldbvolume-api:/var/lib/mysql
+    ports:
+      - ${DB_PORT}:3306
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
+
+# Volume
+volumes:
+  mysqldbvolume-api:
+    driver: local
