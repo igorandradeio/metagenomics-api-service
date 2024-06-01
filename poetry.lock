@@ -191,6 +191,24 @@ files = [
 referencing = ">=0.31.0"
 
 [[package]]
+name = "mysqlclient"
+version = "2.2.4"
+description = "Python interface to MySQL"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mysqlclient-2.2.4-cp310-cp310-win_amd64.whl", hash = "sha256:ac44777eab0a66c14cb0d38965572f762e193ec2e5c0723bcd11319cc5b693c5"},
+    {file = "mysqlclient-2.2.4-cp311-cp311-win_amd64.whl", hash = "sha256:329e4eec086a2336fe3541f1ce095d87a6f169d1cc8ba7b04ac68bcb234c9711"},
+    {file = "mysqlclient-2.2.4-cp312-cp312-win_amd64.whl", hash = "sha256:e1ebe3f41d152d7cb7c265349fdb7f1eca86ccb0ca24a90036cde48e00ceb2ab"},
+    {file = "mysqlclient-2.2.4-cp38-cp38-win_amd64.whl", hash = "sha256:3c318755e06df599338dad7625f884b8a71fcf322a9939ef78c9b3db93e1de7a"},
+    {file = "mysqlclient-2.2.4-cp39-cp39-win_amd64.whl", hash = "sha256:9d4c015480c4a6b2b1602eccd9846103fc70606244788d04aa14b31c4bd1f0e2"},
+    {file = "mysqlclient-2.2.4-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:d43987bb9626096a302ca6ddcdd81feaeca65ced1d5fe892a6a66b808326aa54"},
+    {file = "mysqlclient-2.2.4-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:4e80dcad884dd6e14949ac6daf769123223a52a6805345608bf49cdaf7bc8b3a"},
+    {file = "mysqlclient-2.2.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:9d3310295cb682232cadc28abd172f406c718b9ada41d2371259098ae37779d3"},
+    {file = "mysqlclient-2.2.4.tar.gz", hash = "sha256:33bc9fb3464e7d7c10b1eaf7336c5ff8f2a3d3b88bab432116ad2490beb3bf41"},
+]
+
+[[package]]
 name = "packaging"
 version = "24.0"
 description = "Core utilities for Python packages"
@@ -218,13 +236,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pytest"
-version = "8.2.0"
+version = "8.2.1"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.2.0-py3-none-any.whl", hash = "sha256:1733f0620f6cda4095bbf0d9ff8022486e91892245bb9e7d5542c018f612f233"},
-    {file = "pytest-8.2.0.tar.gz", hash = "sha256:d507d4482197eac0ba2bae2e9babf0672eb333017bcedaa5fb1a3d42c1174b3f"},
+    {file = "pytest-8.2.1-py3-none-any.whl", hash = "sha256:faccc5d332b8c3719f40283d0d44aa5cf101cec36f88cde9ed8f2bc0538612b1"},
+    {file = "pytest-8.2.1.tar.gz", hash = "sha256:5046e5b46d8e4cac199c373041f26be56fdb81eb4e67dc11d4e10811fc3408fd"},
 ]
 
 [package.dependencies]
@@ -481,13 +499,13 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.11.0"
+version = "4.12.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.11.0-py3-none-any.whl", hash = "sha256:c1f94d72897edaf4ce775bb7558d5b79d8126906a14ea5ed1635921406c0387a"},
-    {file = "typing_extensions-4.11.0.tar.gz", hash = "sha256:83f085bd5ca59c80295fc2a82ab5dac679cbe02b9f33f7d83af68e241bea51b0"},
+    {file = "typing_extensions-4.12.0-py3-none-any.whl", hash = "sha256:b349c66bea9016ac22978d800cfff206d5f9816951f12a7d0ec5578b0a819594"},
+    {file = "typing_extensions-4.12.0.tar.gz", hash = "sha256:8cbcdc8606ebcb0d95453ad7dc5065e6237b6aa230a31e81d0f440c30fed5fd8"},
 ]
 
 [[package]]
@@ -515,4 +533,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "63ebc0c4cb16c374109ee558fb825fc1d456a02061f0a71efdc30c1cff127340"
+content-hash = "b903ce4275a239ad24f4264cb8a700a150ea59d98ce92fc88527c2a184f79db6"
