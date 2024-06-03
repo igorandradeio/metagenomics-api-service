@@ -29,13 +29,10 @@ ENV PATH="/root/.local/bin:${PATH}"
 COPY pyproject.toml poetry.lock /app/
 
 # Install project dependencies
-RUN poetry install --no-root
+RUN poetry install
 
 # Copy the project code into the container
 COPY . /app
-
-# Install project dependencies
-RUN poetry install
 
 # Expose the port that the app runs on
 EXPOSE 8000

@@ -1,17 +1,17 @@
 services:
   # image project
   api:
+    container_name: api-service
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: api
     volumes:
       - .:/app
     ports:
       - ${DJANGO_PORT}:8000
     expose:
       - 8000
-    command: "poetry run python manage.py runserver 0.0.0.0:8000"
+    command:  ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
     networks:
       - backend-network
     depends_on:
