@@ -53,6 +53,7 @@ class AssemblyViewSet(ModelViewSet):
                     file_name=file.name,
                     project=project,
                     file=file_saved.replace("api/media/", ""),
+                    upload_source=2
                 )
                 assembly.save()
                 return Response(status=status.HTTP_201_CREATED)

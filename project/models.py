@@ -68,11 +68,18 @@ class Sample(models.Model):
 
 
 class Assembly(models.Model):
+    
+    UPLOAD_SOURCE_CHOICES = [
+        (1, 'Platform Generated'),
+        (2, 'User Uploaded'),
+    ]
+
     file_name = models.CharField(max_length=255)
     file = models.FileField()
     project = models.OneToOneField(
         Project, on_delete=models.CASCADE, related_name="assembly"
     )
+    upload_source = models.IntegerField(choices=UPLOAD_SOURCE_CHOICES, null=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
