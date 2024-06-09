@@ -1,7 +1,6 @@
 services:
-  # image project
   api:
-    container_name: api-service
+    container_name: metasoil_api
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,17 +8,45 @@ services:
       - .:/app
     ports:
       - ${DJANGO_PORT}:8000
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
     expose:
       - 8000
-    command:  ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+    command:
+      [
+        "poetry",
+        "run",
+        "python",
+        "manage.py",
+        "runserver",
+        "0.0.0.0:8000"
+      ]
     networks:
       - backend-network
     depends_on:
       - db
+      - redis
 
-  # db mysql
+  celery:
+    container_name: metasoil_celery
+    build: .
+    command: poetry run celery -A api worker -l info
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - api
+      - redis
+
   db:
-    container_name: db
+    container_name: metasoil_db
     image: mysql:8.0.20
     restart: unless-stopped
     environment:
@@ -34,11 +61,16 @@ services:
     networks:
       - backend-network
 
+  redis:
+    container_name: metasoil_redis
+    image: redis:7.2
+    networks:
+      - backend-network
+
 networks:
   backend-network:
     driver: bridge
 
-# Volume
 volumes:
   mysqldbvolume-api:
     driver: local
