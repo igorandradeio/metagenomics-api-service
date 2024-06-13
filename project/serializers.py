@@ -126,3 +126,6 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = "__all__"
+
+class StartTaskSerializer(serializers.Serializer):
+    project_id = serializers.IntegerField(required=True)

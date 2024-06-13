@@ -35,12 +35,12 @@ services:
     build: .
     command: poetry run celery -A api worker -l info
     volumes:
-      - .:/usr/src/app
+      - .:/app
     environment:
-      - DEBUG=1
-      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
-      - CELERY_BROKER=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
+      - CELERY_BROKER=${CELERY_BROKER}
+      - CELERY_BACKEND=${CELERY_BACKEND}
+    networks:
+      - backend-network
     depends_on:
       - api
       - redis
@@ -64,6 +64,8 @@ services:
   redis:
     container_name: metasoil_redis
     image: redis:7.2
+    ports:
+     - ${REDIS_PORT}:6379
     networks:
       - backend-network
 

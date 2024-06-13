@@ -14,7 +14,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     build-essential \
     curl \
+    wget \
     git
+
+# Install MEGAHIT
+RUN wget https://github.com/voutcn/megahit/releases/download/v1.2.9/MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz && \
+    tar zvxf MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz && \
+    mv MEGAHIT-1.2.9-Linux-x86_64-static/bin/* /usr/local/bin/ && \
+    rm -rf MEGAHIT-1.2.9-Linux-x86_64-static
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
