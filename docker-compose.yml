@@ -33,7 +33,7 @@ services:
   celery:
     container_name: metasoil_celery
     build: .
-    command: poetry run celery -A api worker -l info
+    command: poetry run celery -A api worker -l info --concurrency=1${CELERY_CONCURRENCY} --logfile=/app/celery.log
     volumes:
       - .:/app
     environment:
