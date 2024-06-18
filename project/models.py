@@ -68,10 +68,10 @@ class Sample(models.Model):
 
 
 class Assembly(models.Model):
-    
+
     UPLOAD_SOURCE_CHOICES = [
-        (1, 'Platform Generated'),
-        (2, 'User Uploaded'),
+        (1, "Platform Generated"),
+        (2, "User Uploaded"),
     ]
 
     file_name = models.CharField(max_length=255)
@@ -87,3 +87,18 @@ class Assembly(models.Model):
 
     def __str__(self):
         return self.file_name
+
+
+class Task(models.Model):
+
+    STATUS_CHOICES = [
+        (1, "Pending"),
+        (2, "Success"),
+        (3, "Failure"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="tasks")
+    status = models.IntegerField(choices=STATUS_CHOICES, null=False)
+
+    def __str__(self):
+        return self.name

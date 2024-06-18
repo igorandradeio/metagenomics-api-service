@@ -18,7 +18,8 @@ class AssemblerViewSet(viewsets.ViewSet):
 
         if serializer.is_valid():
             project_id = serializer.validated_data["project_id"]
-            project = get_object_or_404(Project, pk=project_id, user=request.user)
+            user = request.user
+            project = get_object_or_404(Project, pk=project_id, user=user)
             samples = project.samples.all()
 
             if not samples.exists():
@@ -40,9 +41,10 @@ class AssemblerViewSet(viewsets.ViewSet):
             file_paths = [
                 os.path.join(sample_dir, file_name) for file_name in input_files
             ]
-
             # Start the Celery task passing the project_id, sequencing read type, file paths
-            task = run_megahit.delay(project_id, sequencing_read_type, file_paths)
+            task = run_megahit.delay(
+                project_id, sequencing_read_type, file_paths, user.id
+            )
             return Response({"task_id": task.id}, status=status.HTTP_200_OK)
 
         else:
