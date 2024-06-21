@@ -91,6 +91,10 @@ class Assembly(models.Model):
 
 class Task(models.Model):
 
+    TYPE_CHOICES = [
+        (1, "Megahit"),
+    ]
+
     STATUS_CHOICES = [
         (1, "Pending"),
         (2, "Success"),
@@ -98,7 +102,13 @@ class Task(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="tasks")
+    task_id = models.TextField(null=False)
+    type = models.IntegerField(choices=TYPE_CHOICES, null=False)
     status = models.IntegerField(choices=STATUS_CHOICES, null=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
