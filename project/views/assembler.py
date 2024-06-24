@@ -49,20 +49,3 @@ class AssemblerViewSet(viewsets.ViewSet):
 
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=["get"])
-    def task_status(self, request, pk=None):
-        task_id = pk
-        task_result = AsyncResult(task_id)
-
-        if task_result.state == "PENDING":
-            response = {"state": task_result.state, "status": "Pending..."}
-        elif task_result.state != "FAILURE":
-            response = {"state": task_result.state, "result": task_result.result}
-        else:
-            response = {
-                "state": task_result.state,
-                "status": str(task_result.info),
-            }
-
-        return Response(response)
