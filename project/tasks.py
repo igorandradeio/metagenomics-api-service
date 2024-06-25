@@ -6,6 +6,7 @@ import os
 from utils.remove_directory import remove_assembly_directory
 from project.models import Task
 from user.models import User
+from project.models import Assembly, Project
 
 # Define constants for sequencing read types
 SINGLE_END = 1
@@ -48,9 +49,20 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id):
         raise ValueError(error_msg)
 
     try:
+        project = Project.objects.get(id=project_id)
+
         # Execute the command with check=True
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         save_task_status(user, task_id, 2)
+        file_name = "final.contigs.fa"
+        assembly = Assembly(
+            file_name=file_name,
+            project=project,
+            file=f"{output_dir}/{file_name}",
+            upload_source=1
+        )
+        assembly.save()
+
         return result.stdout, result.stderr
     except subprocess.CalledProcessError as e:
         error_msg = (
