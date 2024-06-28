@@ -4,7 +4,7 @@ from celery import shared_task
 import subprocess
 import os
 from utils.remove_directory import remove_assembly_directory
-from project.models import Task
+from task.models import Task
 from user.models import User
 from project.models import Assembly, Project
 
@@ -26,9 +26,10 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id):
     """
     task_id = self.request.id
     user = User.objects.get(id=user_id)
+    project = Project.objects.get(id=project_id)
 
     # Save the initial status as pending
-    save_task_status(user, task_id, 1)
+    save_task_status(user, task_id, project, 1)
 
     base_dir = os.environ.get("UPLOAD_DIR")
     output_dir = os.path.join(base_dir, str(project_id), "assembly")
@@ -45,15 +46,13 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id):
         error_msg = (
             "Invalid sequencing read type. Use 1 for single-end or 2 for paired-end."
         )
-        save_task_status(user, task_id, 3, error_msg)
+        save_task_status(user, task_id, project, 3, error_msg)
         raise ValueError(error_msg)
 
     try:
-        project = Project.objects.get(id=project_id)
-
         # Execute the command with check=True
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        save_task_status(user, task_id, 2)
+        save_task_status(user, task_id, project, 2)
         file_name = "final.contigs.fa"
         assembly = Assembly(
             file_name=file_name,
@@ -68,15 +67,15 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id):
         error_msg = (
             f"MEGAHIT command failed with return code {e.returncode}: {e.stderr}"
         )
-        save_task_status(user, task_id, 3, error_msg)
+        save_task_status(user, task_id, project, 3, error_msg)
         return error_msg
     except Exception as e:
         error_msg = f"An error occurred: {str(e)}"
-        save_task_status(user, task_id, 3, error_msg)
+        save_task_status(user, task_id, project, 3, error_msg)
         return error_msg
 
 
-def save_task_status(user, task_id, status, error_msg=None):
+def save_task_status(user, task_id, project, status, error_msg=None):
     """
     Save or update the status of a task in the database.
 
@@ -87,7 +86,7 @@ def save_task_status(user, task_id, status, error_msg=None):
     - error_msg (str, optional): The error message if the task failed.
     """
     task, created = Task.objects.get_or_create(
-        user=user, task_id=task_id, defaults={"type": 1, "status": status}
+        user=user, task_id=task_id, defaults={"type": 1, "project": project, "status": status}
     )
     if not created:
         task.status = status

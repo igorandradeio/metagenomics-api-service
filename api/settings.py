@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "project",
     "authentication",
     "user",
+    "task"
 ]
 
 AUTH_USER_MODEL = "user.User"
