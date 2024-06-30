@@ -27,8 +27,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd /home/ubuntu/api
             docker compose down
-            git checkout main
-            git pull
             docker compose build
             docker compose up -d
           EOF
