@@ -7,6 +7,7 @@ from project.views import (
     ProjectViewSet,
     SequencingMethodViewSet,
     SequencingReadTypeViewSet,
+    AssemblerViewSet
 )
 
 app_name = "project"
@@ -23,6 +24,8 @@ router.register(
 router.register(
     r"sequencing-read-type", SequencingReadTypeViewSet, basename="sequencing-read-type"
 )
+
+router.register(r'assembler', AssemblerViewSet, basename='assembler')
 
 urlpatterns = [
     path("", include(router.urls)),

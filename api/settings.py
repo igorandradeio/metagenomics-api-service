@@ -27,7 +27,13 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", False)
+# Application definition
+ALLOWED_HOSTS = ["*"]
+
+CORS_ALLOW_ORIGINS = os.environ.get("CORS_ALLOW_ORIGINS")
+CORS_ORIGIN_ALLOW_ALL = True
+
 
 # Application definition
 
@@ -47,6 +53,7 @@ INSTALLED_APPS = [
     "project",
     "authentication",
     "user",
+    "task"
 ]
 
 AUTH_USER_MODEL = "user.User"
@@ -88,8 +95,12 @@ WSGI_APPLICATION = "api.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.mysql"),
+        "NAME": os.environ.get("DB_DATABASE"),
+        "USER": os.environ.get("DB_USERNAME"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST"),
+        "PORT": os.environ.get("DB_PORT"),
     }
 }
 
@@ -147,3 +158,9 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "Soillyze",
 }
+
+# CELERY SETTINGS
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
+CELERY_TIMEZONE =  os.environ.get("CELERY_TIMEZONE")

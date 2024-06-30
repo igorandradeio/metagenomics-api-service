@@ -11,6 +11,7 @@ from authentication.serializers import UserSerializer
 def register(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
+
         user = User(
             email=request.data["email"],
             first_name=request.data["first_name"],
@@ -21,4 +22,5 @@ def register(request):
 
         token = Token.objects.create(user=user)
         return Response({"token": token.key, "user": serializer.data})
-    return Response(serializer.errors, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_409_CONFLICT)

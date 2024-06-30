@@ -8,3 +8,4 @@ media
 api/.env
 # venv
 venv/
+.env
