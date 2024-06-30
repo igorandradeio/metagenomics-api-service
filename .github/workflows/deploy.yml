@@ -12,19 +12,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Deploy to EC2
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_KEY: ${{ secrets.EC2_KEY }}
-          EC2_USER: ${{ secrets.EC2_USER }}
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.EC2_KEY }}
+
+      - name: Copy files via SCP
         run: |
-          echo "${{ secrets.EC2_KEY }}" > key.pem
-          chmod 400 key.pem
-          ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST && 
-          cd "/home/ubuntu/backend && 
-          git pull origin main && 
-          docker compose down && 
-          docker compose up -d --build"
+          scp -r -o StrictHostKeyChecking=no . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/api
+
+      - name: Run deploy script on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/${{ secrets.EC2_USER }}/app
+            docker-compose down
+            docker-compose build
+            docker-compose up -d
+          EOF
