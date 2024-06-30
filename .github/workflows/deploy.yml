@@ -2,10 +2,8 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -13,21 +11,27 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
-      - name: Copy files via SCP
+      - name: Create tarball of the source code
         run: |
-          scp -r -o StrictHostKeyChecking=no . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/api
+          tar -czf app.tar.gz .
 
-      - name: Run deploy script on EC2
+      - name: Copy project via SCP
+        run: |
+          scp -o StrictHostKeyChecking=no app.tar.gz ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/api
+
+      - name: Deploy on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd /home/${{ secrets.EC2_USER }}/app
+            cd /home/ubuntu/api
+            tar -xzf app.tar.gz
+            rm app.tar.gz  # Remove the tar file after extraction
             docker-compose down
             docker-compose build
             docker-compose up -d
