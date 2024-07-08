@@ -17,6 +17,12 @@ class RevokeTaskAPIView(APIView):
         if not task_id:
             return Response({"error": "task_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         
+
+        # Validate the task_id with Celery
+        result = AsyncResult(task_id, app=app)
+        if not result and (result.state == 'PENDING' or result.state == 'STARTED'):
+            return Response({"error": "Invalid task_id"}, status=status.HTTP_400_BAD_REQUEST)
+
         # Update the task's status
         task.status = 4
         task.save()
@@ -32,7 +38,7 @@ class CheckTaskStatusAPIView(APIView):
         response_data = {
             "task_id": task_id,
             "status": result.status,
-            "result": result.result,
+            "result": str(result.result) if result.status != 'REVOKED' else "Task was revoked",
         }
         
         return Response(response_data, status=status.HTTP_200_OK)
