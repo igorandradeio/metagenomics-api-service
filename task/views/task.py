@@ -16,6 +16,6 @@ class TaskViewSet(ModelViewSet):
 
     def list(self, request):
         user = request.user
-        queryset = Task.objects.filter(user=user)
+        queryset = Task.objects.filter(user=user).order_by('-id')
         serializer = TaskSerializer(queryset, many=True)
         return Response(serializer.data)
