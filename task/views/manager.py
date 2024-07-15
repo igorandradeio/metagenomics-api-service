@@ -4,7 +4,7 @@ from rest_framework import status
 from celery.result import AsyncResult
 from celery.app.control import Control
 from api.celery import app  
-from task.models import Task
+from task.models import Task, TaskStatus
 from django.shortcuts import get_object_or_404
 
 class RevokeTaskAPIView(APIView):
@@ -17,8 +17,14 @@ class RevokeTaskAPIView(APIView):
         if not task_id:
             return Response({"error": "task_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         
+
+        # Validate the task_id with Celery
+        result = AsyncResult(task_id, app=app)
+        if not result and (result.state == 'PENDING' or result.state == 'STARTED'):
+            return Response({"error": "Invalid task_id"}, status=status.HTTP_400_BAD_REQUEST)
+
         # Update the task's status
-        task.status = 4
+        task.status = TaskStatus.REVOKED
         task.save()
 
         control = Control(app=app)
@@ -32,7 +38,7 @@ class CheckTaskStatusAPIView(APIView):
         response_data = {
             "task_id": task_id,
             "status": result.status,
-            "result": result.result,
+            "result": str(result.result) if result.status != 'REVOKED' else "Task was revoked",
         }
         
         return Response(response_data, status=status.HTTP_200_OK)
