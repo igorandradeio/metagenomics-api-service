@@ -4,7 +4,7 @@ from rest_framework import status
 from celery.result import AsyncResult
 from celery.app.control import Control
 from api.celery import app  
-from task.models import Task
+from task.models import Task, TaskStatus
 from django.shortcuts import get_object_or_404
 
 class RevokeTaskAPIView(APIView):
@@ -24,7 +24,7 @@ class RevokeTaskAPIView(APIView):
             return Response({"error": "Invalid task_id"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Update the task's status
-        task.status = 4
+        task.status = TaskStatus.REVOKED
         task.save()
 
         control = Control(app=app)
