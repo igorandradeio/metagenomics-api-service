@@ -20,12 +20,10 @@ router.register(r"assembly", AssemblyViewSet, basename="assembly")
 
 router.register(
     r"sequencing-method", SequencingMethodViewSet, basename="sequencing-method"
-)
+) 
 router.register(
     r"sequencing-read-type", SequencingReadTypeViewSet, basename="sequencing-read-type"
 )
-
-router.register(r'assembler', AssemblerViewSet, basename='assembler')
 
 urlpatterns = [
     path("", include(router.urls)),
@@ -44,4 +42,6 @@ urlpatterns = [
         SampleViewSet.as_view(actions={"get": "download_sample"}),
         name="download_sample",
     ),
+    path('projects/<int:pk>/start_assembly/', AssemblerViewSet.as_view(actions={"post": "start_assembly"}), name='start-assembly'),
+
 ]

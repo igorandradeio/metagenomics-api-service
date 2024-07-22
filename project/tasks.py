@@ -14,7 +14,7 @@ PAIRED_END = 2
 
 
 @shared_task(bind=True)
-def run_megahit(self, project_id, sequencing_read_type, input_files, user_id):
+def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, options):
     """
     Run MEGAHIT based on the sequencing read type.
 
@@ -27,6 +27,9 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id):
     task_id = self.request.id
     user = User.objects.get(id=user_id)
     project = Project.objects.get(id=project_id)
+    k_count, k_min, k_max, k_step = options
+
+
 
     # Save the initial status as pending
     save_task_status(user, task_id, project, TaskStatus.STARTED)
@@ -37,11 +40,21 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id):
     # Delete the last output directory
     remove_assembly_directory(output_dir, project_id)
 
+    command = [
+        "megahit",
+        "-o", output_dir,
+        "--min-count", str(k_count),
+        "--k-min", str(k_min),
+        "--k-max", str(k_max),
+        "--k-step", str(k_step)
+    ]
+    
     # Construct the MEGAHIT command based on the sequencing read type
     if sequencing_read_type == SINGLE_END:
-        cmd = ["megahit", "-r", input_files[0], "-o", output_dir]
+        command.extend(["-r", input_files[0]])
+
     elif sequencing_read_type == PAIRED_END:
-        cmd = ["megahit", "-1", input_files[0], "-2", input_files[1], "-o", output_dir]
+        command.extend(["-1", input_files[0], "-2", input_files[1]])
     else:
         error_msg = (
             "Invalid sequencing read type. Use 1 for single-end or 2 for paired-end."
@@ -51,7 +64,7 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id):
 
     try:
         # Execute the command with check=True
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
         save_task_status(user, task_id, project, TaskStatus.SUCCESS)
         file_name = "final.contigs.fa"
         assembly = Assembly(

@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from project.tasks import run_megahit
-from project.serializers import ProjectDetailSerializer, StartTaskSerializer
+from project.serializers import ProjectDetailSerializer, AssemblerSerializer
 from celery.result import AsyncResult
 from project.models import Project, Sample
 from django.shortcuts import get_object_or_404
@@ -12,16 +12,24 @@ from django.conf import settings
 
 class AssemblerViewSet(viewsets.ViewSet):
 
-    @action(detail=False, methods=["post"])
-    def start(self, request):
-        serializer = StartTaskSerializer(data=request.data)
+    @action(detail=True, methods=["post"])
+    def start_assembly(self, request, pk=None):
+
+        serializer = AssemblerSerializer(data=request.data)
 
         if serializer.is_valid():
-            project_id = serializer.validated_data["project_id"]
             user = request.user
-            project = get_object_or_404(Project, pk=project_id, user=user)
+            project = get_object_or_404(Project, pk=pk, user=user)
             samples = project.samples.all()
 
+            # Basic assembly options
+            k_count = serializer.validated_data['k_count']
+            k_min = serializer.validated_data['k_min']
+            k_max = serializer.validated_data['k_max']
+            k_step = serializer.validated_data['k_step']
+
+            options = [k_count, k_min, k_max, k_step]
+            
             if not samples.exists():
                 return Response(
                     {"error": "No samples found for the project."},
@@ -35,7 +43,7 @@ class AssemblerViewSet(viewsets.ViewSet):
 
             # Construct file paths
             base_dir = os.environ.get("UPLOAD_DIR")
-            sample_dir = os.path.join(base_dir, str(project_id), "sample")
+            sample_dir = os.path.join(base_dir, str(pk), "sample")
 
             # Construct the file paths
             file_paths = [
@@ -43,7 +51,7 @@ class AssemblerViewSet(viewsets.ViewSet):
             ]
             # Start the Celery task passing the project_id, sequencing read type, file paths
             task = run_megahit.delay(
-                project_id, sequencing_read_type, file_paths, user.id
+                pk, sequencing_read_type, file_paths, user.id, options
             )
             return Response({"task_id": task.id}, status=status.HTTP_200_OK)
 
