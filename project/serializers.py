@@ -127,5 +127,8 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         model = Project
         fields = "__all__"
 
-class StartTaskSerializer(serializers.Serializer):
-    project_id = serializers.IntegerField(required=True)
+class AssemblerSerializer(serializers.Serializer):
+    k_count = serializers.IntegerField()
+    k_min = serializers.IntegerField()
+    k_max = serializers.IntegerField()
+    k_step = serializers.IntegerField()
