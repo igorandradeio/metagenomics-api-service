@@ -159,6 +159,29 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Soillyze",
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django.log'),
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
+            'propagate': False,
+        },
+    },
+}
+
 # CELERY SETTINGS
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
