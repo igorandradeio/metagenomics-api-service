@@ -7,6 +7,7 @@ from utils.remove_directory import remove_assembly_directory
 from task.models import Task, TaskStatus
 from user.models import User
 from project.models import Assembly, Project
+import logging
 
 # Define constants for sequencing read types
 SINGLE_END = 1
@@ -24,21 +25,18 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
     - input_files (list): List of input files. For single-end, it will be a list with one file. For paired-end, it will be a list with two files.
     - user_id (int): ID of the user who initiated the task.
     """
+    
     task_id = self.request.id
     user = User.objects.get(id=user_id)
     project = Project.objects.get(id=project_id)
     k_count, k_min, k_max, k_step = options
-
-
-
-    # Save the initial status as pending
-    save_task_status(user, task_id, project, TaskStatus.STARTED)
-
     base_dir = os.environ.get("UPLOAD_DIR")
     output_dir = os.path.join(base_dir, str(project_id), "assembly")
-
     # Delete the last output directory
     remove_assembly_directory(output_dir, project_id)
+    
+    # Sets the task status to "STARTED"
+    save_task_status(user, task_id, project, TaskStatus.STARTED)
 
     command = [
         "megahit",
@@ -59,14 +57,16 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
         error_msg = (
             "Invalid sequencing read type. Use 1 for single-end or 2 for paired-end."
         )
+        # Sets the task status to "FAILURE"
         save_task_status(user, task_id, project, TaskStatus.FAILURE, error_msg)
         raise ValueError(error_msg)
 
     try:
-        # Execute the command with check=True
         result = subprocess.run(command, capture_output=True, text=True, check=True)
+        # Sets the task status to "SUCCESS"
         save_task_status(user, task_id, project, TaskStatus.SUCCESS)
-        file_name = "final.contigs.fa"
+        file_name = os.environ.get("FINAL_CONTIGS_NAME")
+
         assembly = Assembly(
             file_name=file_name,
             project=project,
@@ -90,7 +90,7 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
 
 def save_task_status(user, task_id, project, status, error_msg=None):
     """
-    Save or update the status of a task in the database.
+    Update the status of a task in the database.
 
     Parameters:
     - user (User): The user object.
@@ -98,12 +98,25 @@ def save_task_status(user, task_id, project, status, error_msg=None):
     - status (int): The status code of the task (1 for pending, 2 for success, 3 for failure).
     - error_msg (str, optional): The error message if the task failed.
     """
-    task, created = Task.objects.get_or_create(
-        user=user, task_id=task_id, defaults={"type": 1, "project": project, "status": status}
-    )
-    if not created:
+    logger = logging.getLogger(__name__)
+
+    try:
+        # Attempt to get the existing task
+        task = Task.objects.get(
+            user=user,
+            task_id=task_id,
+            type=1,
+            project=project
+        )
+        # Update the existing task's status
         task.status = status
         task.save()
+
+    except Task.DoesNotExist:
+        logger.error(f"Task with ID {task_id} does not exist. Unable to update status.")
+
+    except Exception as e:
+        logger.error(f"Failed to update task with ID {task_id}: {str(e)}")
+
     if error_msg:
-        # Log the error message or handle it as needed
-        print(error_msg)
+        logger.error(error_msg)

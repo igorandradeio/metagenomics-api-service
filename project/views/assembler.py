@@ -5,6 +5,7 @@ from project.tasks import run_megahit
 from project.serializers import ProjectDetailSerializer, AssemblerSerializer
 from celery.result import AsyncResult
 from project.models import Project, Sample
+from task.models import Task, TaskStatus
 from django.shortcuts import get_object_or_404
 import os
 from django.conf import settings
@@ -53,7 +54,14 @@ class AssemblerViewSet(viewsets.ViewSet):
             task = run_megahit.delay(
                 pk, sequencing_read_type, file_paths, user.id, options
             )
-            return Response({"task_id": task.id}, status=status.HTTP_200_OK)
+
+            task_id = task.id
+
+            # Save the initial task status as pending
+            task = Task(user=user, task_id = task_id, type = 1, project = project, status = TaskStatus.PENDING)
+            task.save()
+
+            return Response({"task_id": task_id}, status=status.HTTP_200_OK)
 
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
