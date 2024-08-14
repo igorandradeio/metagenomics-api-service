@@ -28,11 +28,6 @@ class SampleViewSet(ModelViewSet):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def download_sample(self, request, sample_id):
-        sample = get_object_or_404(Sample, id=sample_id)
-        file = sample.file.path
-        return FileResponse(open(file, "rb"))
-
     def create(self, request):
         if "r1" in request.FILES and "r2" in request.FILES:
             r1 = request.FILES["r1"]
