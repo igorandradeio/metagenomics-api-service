@@ -52,7 +52,7 @@ class AssemblyViewSet(ModelViewSet):
                 assembly = Assembly(
                     file_name=file.name,
                     project=project,
-                    file=file_saved.replace("api/media/", ""),
+                    file=file_saved.replace("media/", ""),
                     upload_source=2
                 )
                 assembly.save()

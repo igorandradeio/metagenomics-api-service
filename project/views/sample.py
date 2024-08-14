@@ -54,7 +54,7 @@ class SampleViewSet(ModelViewSet):
                 sample1 = Sample(
                     file_name=r1.name,
                     project=project,
-                    file=r1_saved.replace("api/media/", ""),
+                    file=r1_saved.replace("media/", ""),
                     read_orientation=1,
                 )
                 sample1.save()
@@ -62,7 +62,7 @@ class SampleViewSet(ModelViewSet):
                 sample2 = Sample(
                     file_name=r2.name,
                     project=project,
-                    file=r2_saved.replace("api/media/", ""),
+                    file=r2_saved.replace("media/", ""),
                     read_orientation=2,
                 )
                 sample2.save()
@@ -87,7 +87,7 @@ class SampleViewSet(ModelViewSet):
                 sample = Sample(
                     file_name=file.name,
                     project=project,
-                    file=file_saved.replace("api/media/", ""),
+                    file=file_saved.replace("media/", ""),
                 )
                 sample.save()
 
