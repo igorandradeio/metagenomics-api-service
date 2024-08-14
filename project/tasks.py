@@ -66,11 +66,12 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
         # Sets the task status to "SUCCESS"
         save_task_status(user, task_id, project, TaskStatus.SUCCESS)
         file_name = os.environ.get("FINAL_CONTIGS_NAME")
+        file_path = os.path.join(output_dir, file_name)
 
         assembly = Assembly(
             file_name=file_name,
             project=project,
-            file=f"{output_dir}/{file_name}",
+            file=file_path.replace("media/", ""),
             upload_source=1
         )
         assembly.save()
