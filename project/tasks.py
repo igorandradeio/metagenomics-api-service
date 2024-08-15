@@ -30,8 +30,7 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
     user = User.objects.get(id=user_id)
     project = Project.objects.get(id=project_id)
     k_count, k_min, k_max, k_step = options
-    base_dir = os.environ.get("UPLOAD_DIR")
-    output_dir = os.path.join(base_dir, str(project_id), "assembly")
+    output_dir = os.path.join("media", "projects", str(project_id), "assembly")
     # Delete the last output directory
     remove_assembly_directory(output_dir, project_id)
     

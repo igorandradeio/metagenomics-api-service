@@ -36,8 +36,7 @@ class SampleViewSet(ModelViewSet):
             project_id = request.data.get("project")
             project = get_object_or_404(Project, pk=project_id, user=request.user)
 
-            base_dir = os.environ.get("UPLOAD_DIR")
-            upload_dir = os.path.join(base_dir, str(project_id), "sample")
+            upload_dir = os.path.join("media", "projects", str(project_id), "sample")
 
             remove_sample_directory(upload_dir, project_id)
             os.makedirs(upload_dir, exist_ok=True)
@@ -70,8 +69,7 @@ class SampleViewSet(ModelViewSet):
             project_id = request.data.get("project")
             project = get_object_or_404(Project, pk=project_id, user=request.user)
 
-            base_dir = os.environ.get("UPLOAD_DIR")
-            upload_dir = os.path.join(base_dir, str(project_id), "sample")
+            upload_dir = os.path.join("media", "projects", str(project_id), "sample")
 
             remove_sample_directory(upload_dir, project_id)
             os.makedirs(upload_dir, exist_ok=True)
