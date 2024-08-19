@@ -33,7 +33,9 @@ ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOW_ORIGINS = os.environ.get("CORS_ALLOW_ORIGINS")
 CORS_ORIGIN_ALLOW_ALL = True
-
+CORS_EXPOSE_HEADERS = [
+    'content-disposition',
+]
 
 # Application definition
 
@@ -175,7 +177,7 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['file'],
             'level': os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
             'propagate': False,
         },

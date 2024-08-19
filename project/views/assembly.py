@@ -37,8 +37,7 @@ class AssemblyViewSet(ModelViewSet):
             project_id = request.data.get("project")
             project = Project.objects.get(id=project_id)
 
-            base_dir = os.environ.get("UPLOAD_DIR")
-            upload_dir = os.path.join(base_dir, str(project_id), "assembly")
+            upload_dir = os.path.join("media", "projects", str(project_id), "assembly")
 
             # just for testing
             remove_assembly_directory(upload_dir, project_id)

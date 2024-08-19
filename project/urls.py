@@ -7,7 +7,8 @@ from project.views import (
     ProjectViewSet,
     SequencingMethodViewSet,
     SequencingReadTypeViewSet,
-    AssemblerViewSet
+    AssemblerViewSet,
+    FileDownloadView
 )
 
 app_name = "project"
@@ -37,11 +38,7 @@ urlpatterns = [
         AssemblyViewSet.as_view(actions={"get": "assembly_by_project"}),
         name="assembly-by-project",
     ),
-    path(
-        "samples/<int:sample_id>/download/",
-        SampleViewSet.as_view(actions={"get": "download_sample"}),
-        name="download_sample",
-    ),
+    path('download/<str:model_type>/<int:id>/', FileDownloadView.as_view(), name='download_file'), 
     path('projects/<int:pk>/start_assembly/', AssemblerViewSet.as_view(actions={"post": "start_assembly"}), name='start-assembly'),
 
 ]

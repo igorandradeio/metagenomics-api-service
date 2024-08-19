@@ -43,8 +43,7 @@ class AssemblerViewSet(viewsets.ViewSet):
             sequencing_read_type = project.sequencing_read_type_id
 
             # Construct file paths
-            base_dir = os.environ.get("UPLOAD_DIR")
-            sample_dir = os.path.join(base_dir, str(pk), "sample")
+            sample_dir = os.path.join("media", "projects", str(pk), "sample")
 
             # Construct the file paths
             file_paths = [

@@ -28,11 +28,6 @@ class SampleViewSet(ModelViewSet):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def download_sample(self, request, sample_id):
-        sample = get_object_or_404(Sample, id=sample_id)
-        file = sample.file.path
-        return FileResponse(open(file, "rb"))
-
     def create(self, request):
         if "r1" in request.FILES and "r2" in request.FILES:
             r1 = request.FILES["r1"]
@@ -41,8 +36,7 @@ class SampleViewSet(ModelViewSet):
             project_id = request.data.get("project")
             project = get_object_or_404(Project, pk=project_id, user=request.user)
 
-            base_dir = os.environ.get("UPLOAD_DIR")
-            upload_dir = os.path.join(base_dir, str(project_id), "sample")
+            upload_dir = os.path.join("media", "projects", str(project_id), "sample")
 
             remove_sample_directory(upload_dir, project_id)
             os.makedirs(upload_dir, exist_ok=True)
@@ -75,8 +69,7 @@ class SampleViewSet(ModelViewSet):
             project_id = request.data.get("project")
             project = get_object_or_404(Project, pk=project_id, user=request.user)
 
-            base_dir = os.environ.get("UPLOAD_DIR")
-            upload_dir = os.path.join(base_dir, str(project_id), "sample")
+            upload_dir = os.path.join("media", "projects", str(project_id), "sample")
 
             remove_sample_directory(upload_dir, project_id)
             os.makedirs(upload_dir, exist_ok=True)
