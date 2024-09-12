@@ -15,16 +15,37 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     wget \
-    git
+    git \
+    default-jre
 
-# Install MEGAHIT
-RUN wget https://github.com/voutcn/megahit/releases/download/v1.2.9/MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz && \
-    tar zvxf MEGAHIT-1.2.9-Linux-x86_64-static.tar.gz && \
-    mv MEGAHIT-1.2.9-Linux-x86_64-static/bin/* /usr/local/bin/ && \
-    rm -rf MEGAHIT-1.2.9-Linux-x86_64-static
+# Create a directory for Miniconda
+RUN mkdir -p /opt/miniconda3
+
+# Download and install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /opt/miniconda3/miniconda.sh && \
+    bash /opt/miniconda3/miniconda.sh -b -u -p /opt/miniconda3 && \
+    rm /opt/miniconda3/miniconda.sh
+
+# Add Miniconda to PATH
+ENV PATH="/opt/miniconda3/bin:${PATH}"
+
+# Set Conda environments path to /opt/conda/envs
+ENV CONDA_ENVS_PATH=/opt/conda/envs
+
+COPY nextflow/env.yml /app/
+
+# Initialize Miniconda for bash
+RUN conda init bash
+
+# #  Add channels and install the tools
+RUN conda env create --file env.yml
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Nextflow
+RUN curl -s https://get.nextflow.io | bash && \
+    mv nextflow /usr/local/bin/
 
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -

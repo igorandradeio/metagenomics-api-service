@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 import subprocess
 import os
+from django.conf import settings
 from utils.remove_directory import remove_assembly_directory
 from task.models import Task, TaskStatus
 from user.models import User
@@ -17,12 +18,12 @@ PAIRED_END = 2
 @shared_task(bind=True)
 def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, options):
     """
-    Run MEGAHIT based on the sequencing read type.
-
+    Execute Nextflow pipeline to run MEGAHIT.
+    
     Parameters:
-    - project_id (int): ID of the project for which the MEGAHIT assembly is being run.
+    - project_id (int): ID of the project for which the assembly is being run.
     - sequencing_read_type (int): Sequencing type (1 for single-end, 2 for paired-end).
-    - input_files (list): List of input files. For single-end, it will be a list with one file. For paired-end, it will be a list with two files.
+    - input_files (list): List of input files (one for single-end, two for paired-end).
     - user_id (int): ID of the user who initiated the task.
     """
     
@@ -30,28 +31,35 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
     user = User.objects.get(id=user_id)
     project = Project.objects.get(id=project_id)
     k_count, k_min, k_max, k_step = options
-    output_dir = os.path.join("media", "projects", str(project_id), "assembly")
-    # Delete the last output directory
-    remove_assembly_directory(output_dir, project_id)
+    current_dir = os.path.join("media", "projects", str(project_id), "assembly")
+    output_dir = os.path.join("media", "projects", str(project_id))
+
+    # Remove previous assembly directory if it exists
+    remove_assembly_directory(current_dir, project_id)
     
-    # Sets the task status to "STARTED"
+    # Update task status to "STARTED"
     save_task_status(user, task_id, project, TaskStatus.STARTED)
 
-    command = [
-        "megahit",
-        "-o", output_dir,
-        "--min-count", str(k_count),
-        "--k-min", str(k_min),
-        "--k-max", str(k_max),
-        "--k-step", str(k_step)
+    workflow_path = os.path.join(settings.BASE_DIR, 'nextflow', 'workflows', 'megahit', 'main.nf')
+
+    # Build the Nextflow command
+    nextflow_command = [
+        "nextflow", "run", workflow_path,
+        "-with-conda",
+        "--output", output_dir,
+        "--read_type", str(sequencing_read_type),
+        "--k_count", str(k_count),
+        "--k_min", str(k_min),
+        "--k_max", str(k_max),
+        "--k_step", str(k_step),
     ]
-    
+
     # Construct the MEGAHIT command based on the sequencing read type
     if sequencing_read_type == SINGLE_END:
-        command.extend(["-r", input_files[0]])
+        nextflow_command.extend(["--read1", input_files[0]])
 
     elif sequencing_read_type == PAIRED_END:
-        command.extend(["-1", input_files[0], "-2", input_files[1]])
+        nextflow_command.extend(["--read1", input_files[0], "--read2", input_files[1]])
     else:
         error_msg = (
             "Invalid sequencing read type. Use 1 for single-end or 2 for paired-end."
@@ -59,13 +67,14 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
         # Sets the task status to "FAILURE"
         save_task_status(user, task_id, project, TaskStatus.FAILURE, error_msg)
         raise ValueError(error_msg)
-
     try:
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
-        # Sets the task status to "SUCCESS"
+        result = subprocess.run(nextflow_command, capture_output=True, text=True, check=True)
+        
+        # On success, update task status
         save_task_status(user, task_id, project, TaskStatus.SUCCESS)
+        
         file_name = os.environ.get("FINAL_CONTIGS_NAME")
-        file_path = os.path.join(output_dir, file_name)
+        file_path = os.path.join(current_dir, file_name)
 
         assembly = Assembly(
             file_name=file_name,
@@ -76,12 +85,12 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
         assembly.save()
 
         return result.stdout, result.stderr
+    
     except subprocess.CalledProcessError as e:
-        error_msg = (
-            f"MEGAHIT command failed with return code {e.returncode}: {e.stderr}"
-        )
+        error_msg = f"Nextflow pipeline failed with return code {e.returncode}: {e.stderr}"
         save_task_status(user, task_id, project, TaskStatus.FAILURE, error_msg)
         return error_msg
+
     except Exception as e:
         error_msg = f"An error occurred: {str(e)}"
         save_task_status(user, task_id, project, TaskStatus.FAILURE, error_msg)
@@ -95,6 +104,7 @@ def save_task_status(user, task_id, project, status, error_msg=None):
     Parameters:
     - user (User): The user object.
     - task_id (str): The ID of the Celery task.
+    - project: The project object.
     - status (int): The status code of the task (1 for pending, 2 for success, 3 for failure).
     - error_msg (str, optional): The error message if the task failed.
     """

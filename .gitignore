@@ -6,6 +6,9 @@ __pycache__
 db.sqlite3
 media
 api/.env
-# venv
 venv/
 .env
+.nextflow/
+.nextflow.log*
+nextflow/workflows/*/work/
+work/
