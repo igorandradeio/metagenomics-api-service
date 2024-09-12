@@ -4,8 +4,8 @@
 params.output = "/assembly"
 
 process MEGAHIT {
-    cpus = 12
-    memory = 16.GB
+    cpus 12
+    memory 16.GB
     publishDir params.output , mode: 'copy', overwrite: true
     input:
     path read1
