@@ -121,9 +121,6 @@ def run_annotation(self, project_id, sequencing_read_type, input_files, user_id)
         "media", "projects", str(project_id), "assembly")
     output_dir = os.path.join("media", "projects", str(project_id))
 
-    # Remove previous assembly directory if it exists
-    remove_assembly_directory(current_dir, project_id)
-
     # Update task status to "STARTED"
     save_task_status(user, task_id, project, TaskStatus.STARTED)
 
@@ -149,9 +146,10 @@ def run_annotation(self, project_id, sequencing_read_type, input_files, user_id)
     # Construct the Nextflow command
     nextflow_command = [
         "nextflow", "run", "nf-core/mag",
-        "--input", csv_file_path,
+        "-r", "3.2.1",
+        "--skip_spades", "--skip_spadeshybrid", "--skip_quast", "--skip_binning",
+        "-profile", "test,docker",
         "--outdir", output_dir,
-        "-profile", "docker"
     ]
 
     try:
