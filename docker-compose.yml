@@ -1,11 +1,14 @@
 services:
   api:
     container_name: metasoil_api
+    privileged: true
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
       - .:/app
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - ${DJANGO_PORT}:8000
     environment:
@@ -32,10 +35,13 @@ services:
 
   celery:
     container_name: metasoil_celery
+    privileged: true
     build: .
     command: poetry run celery -A api worker -l info --concurrency=${CELERY_CONCURRENCY} --logfile=/app/celery.log
     volumes:
       - .:/app
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     environment:
       - CELERY_BROKER=${CELERY_BROKER}
       - CELERY_BACKEND=${CELERY_BACKEND}

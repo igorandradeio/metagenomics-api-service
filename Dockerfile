@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM ubuntu:22.04
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -16,7 +16,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
     git \
-    default-jre
+    default-jre \
+    gpg-agent \
+    software-properties-common
+
+RUN add-apt-repository -y ppa:apptainer/ppa
+
+RUN apt update && \
+    apt install -y apptainer-suid
 
 # Create a directory for Miniconda
 RUN mkdir -p /opt/miniconda3

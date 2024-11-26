@@ -148,7 +148,7 @@ def run_annotation(self, project_id, sequencing_read_type, input_files, user_id)
         "nextflow", "run", "nf-core/mag",
         "-r", "3.2.1",
         "--skip_spades", "--skip_spadeshybrid", "--skip_quast", "--skip_binning",
-        "-profile", "test,docker",
+        "-profile", "test,apptainer",
         "--outdir", output_dir,
     ]
 
