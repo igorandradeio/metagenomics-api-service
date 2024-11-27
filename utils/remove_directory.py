@@ -1,5 +1,4 @@
 import shutil
-import shutil
 from project.models import Sample, Assembly
 
 
