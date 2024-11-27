@@ -8,9 +8,10 @@ from utils.remove_directory import remove_assembly_directory
 from utils.remove_work_dir import remove_work_dir
 from task.models import Task, TaskStatus
 from user.models import User
-from project.models import Assembly, Project
+from project.models import Assembly, Project, Analysis
 import logging
 import csv
+import shutil
 
 # Define constants for sequencing read types
 SINGLE_END = 1
@@ -117,9 +118,16 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
     task_id = self.request.id
     user = User.objects.get(id=user_id)
     project = Project.objects.get(id=project_id)
-    current_dir = os.path.join(
-        "media", "projects", str(project_id), "assembly")
-    output_dir = os.path.join("media", "projects", str(project_id))
+
+    output_dir = os.path.join("media", "projects", str(project_id), "analysis")
+
+    # Remove and recreate the directory
+    try:
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+    except OSError as e:
+        print(f"Error managing directory {output_dir}: {e}")
 
     # Update task status to "STARTED"
     save_task_status(user, task_id, project, TaskStatus.STARTED)
@@ -155,6 +163,11 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
     try:
         result = subprocess.run(
             nextflow_command, capture_output=True, text=True, check=True)
+
+        analysis = Analysis(
+            project=project,
+        )
+        analysis.save()
 
         # On success, update task status
         save_task_status(user, task_id, project, TaskStatus.SUCCESS)

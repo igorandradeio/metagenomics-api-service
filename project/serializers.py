@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Country, SequencingMethod, Project, Sample, Assembly, SequencingReadType
+from .models import Country, SequencingMethod, Project, Sample, Assembly, SequencingReadType, Analysis
 from user.models import User
 import os
 
@@ -92,11 +92,22 @@ class AssemblyListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Assembly
-        fields = ["id", "project_id", "file_name", "download", "date", "upload_source"]
+        fields = ["id", "project_id", "file_name",
+                  "download", "date", "upload_source"]
 
     def get_download(self, obj):
         base_url = os.environ.get("BASE_URL")
         return f"{base_url}/api/assembly/{obj.pk}/download/"
+
+
+class AnalysisListSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(
+        source="created_at", read_only=True, format="%d-%m-%Y"
+    )
+
+    class Meta:
+        model = Analysis
+        fields = ["id", "project_id", "date"]
 
 
 class AssemblySerializer(serializers.ModelSerializer):
@@ -126,6 +137,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = "__all__"
+
 
 class AssemblerSerializer(serializers.Serializer):
     k_count = serializers.IntegerField()

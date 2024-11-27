@@ -34,8 +34,10 @@ class SequencingMethod(models.Model):
 # Project
 class Project(models.Model):
     name = models.CharField(max_length=255)
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="projects")
-    sequencing_method = models.ForeignKey(SequencingMethod, on_delete=models.PROTECT)
+    user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="projects")
+    sequencing_method = models.ForeignKey(
+        SequencingMethod, on_delete=models.PROTECT)
     sequencing_read_type = models.ForeignKey(
         SequencingReadType, on_delete=models.PROTECT
     )
@@ -57,7 +59,8 @@ class Sample(models.Model):
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name="samples"
     )
-    read_orientation = models.IntegerField(choices=READ_ORIENTATION_CHOICES, null=True)
+    read_orientation = models.IntegerField(
+        choices=READ_ORIENTATION_CHOICES, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -65,6 +68,17 @@ class Sample(models.Model):
 
     def __str__(self):
         return self.file_name
+
+
+class Analysis(models.Model):
+
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="analysis"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
 
 
 class Assembly(models.Model):
@@ -79,7 +93,8 @@ class Assembly(models.Model):
     project = models.OneToOneField(
         Project, on_delete=models.CASCADE, related_name="assembly"
     )
-    upload_source = models.IntegerField(choices=UPLOAD_SOURCE_CHOICES, null=False)
+    upload_source = models.IntegerField(
+        choices=UPLOAD_SOURCE_CHOICES, null=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
