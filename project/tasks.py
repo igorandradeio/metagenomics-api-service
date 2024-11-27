@@ -112,7 +112,7 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
 
 
 @shared_task(bind=True)
-def run_annotation(self, project_id, sequencing_read_type, input_files, user_id):
+def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
 
     task_id = self.request.id
     user = User.objects.get(id=user_id)

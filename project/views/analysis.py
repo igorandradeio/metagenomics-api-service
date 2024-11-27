@@ -1,16 +1,16 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from project.tasks import run_annotation
+from project.tasks import run_analysis
 from project.models import Project
 from task.models import Task, TaskStatus
 from django.shortcuts import get_object_or_404
 
 
-class AnnotationViewSet(viewsets.ViewSet):
+class AnalysisViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=["post"])
-    def start_annotation(self, request, pk):
+    def start_analysis(self, request, pk):
         user = request.user
         project = get_object_or_404(Project, pk=pk, user=user)
         samples = project.samples.all()
@@ -27,7 +27,7 @@ class AnnotationViewSet(viewsets.ViewSet):
         sequencing_read_type = project.sequencing_read_type_id
 
         # Start the Celery task
-        task = run_annotation.delay(
+        task = run_analysis.delay(
             pk, sequencing_read_type, input_files, user.id)
 
         task_id = task.id
