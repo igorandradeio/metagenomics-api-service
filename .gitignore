@@ -8,7 +8,5 @@ media
 api/.env
 venv/
 .env
-.nextflow/
-.nextflow.log*
-nextflow/workflows/*/work/
-work/
+.nextflow*
+work
