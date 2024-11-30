@@ -45,7 +45,7 @@ class AnalysisViewSet(viewsets.ViewSet):
         task_id = task.id
 
         # Save the initial task status as pending
-        task = Task(user=user, task_id=task_id, type=1,
+        task = Task(user=user, task_id=task_id, type=2,
                     project=project, status=TaskStatus.PENDING)
         task.save()
 

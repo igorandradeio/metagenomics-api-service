@@ -151,11 +151,16 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
         writer.writerow(
             [f"sample_1", "0", file_paths[0], file_paths[1], ""])
 
+    parameters = os.environ.get("ANALYSIS_PARAMETERS")
+    if parameters is None:
+        parameters = []
+    else:
+        parameters = parameters.split()
+
     # Construct the Nextflow command
     nextflow_command = [
         "nextflow", "run", "nf-core/mag",
-        "-r", "3.2.1",
-        "--skip_spades", "--skip_spadeshybrid", "--skip_quast", "--skip_binning",
+        *parameters,
         "-profile", "test,apptainer",
         "--outdir", output_dir,
     ]
@@ -205,7 +210,6 @@ def save_task_status(user, task_id, project, status, error_msg=None):
         task = Task.objects.get(
             user=user,
             task_id=task_id,
-            type=1,
             project=project
         )
         # Update the existing task's status
