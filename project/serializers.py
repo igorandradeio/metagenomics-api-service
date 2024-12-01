@@ -144,3 +144,11 @@ class AssemblerSerializer(serializers.Serializer):
     k_min = serializers.IntegerField()
     k_max = serializers.IntegerField()
     k_step = serializers.IntegerField()
+
+
+class FileSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    type = serializers.ChoiceField(choices=["folder", "file"])
+    size = serializers.IntegerField(required=False)
+    children = serializers.ListField(
+        child=serializers.DictField(), required=False)
