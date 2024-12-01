@@ -161,7 +161,7 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
     nextflow_command = [
         "nextflow", "run", "nf-core/mag",
         *parameters,
-        "-profile", "test,apptainer",
+        "--input", csv_file_path,
         "--outdir", output_dir,
     ]
 
