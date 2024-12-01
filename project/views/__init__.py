@@ -6,3 +6,4 @@ from .sequencing_read_type import SequencingReadTypeViewSet
 from .assembler import AssemblerViewSet
 from .analysis import AnalysisViewSet
 from .file_download import FileDownloadView
+from .directory import DirectoryView

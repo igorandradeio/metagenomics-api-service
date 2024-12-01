@@ -9,7 +9,8 @@ from project.views import (
     SequencingReadTypeViewSet,
     AssemblerViewSet,
     AnalysisViewSet,
-    FileDownloadView
+    FileDownloadView,
+    DirectoryView
 )
 
 app_name = "project"
@@ -50,5 +51,7 @@ urlpatterns = [
         actions={"post": "start_assembly"}), name='start-assembly'),
     path('projects/<int:pk>/start_annotation/', AnalysisViewSet.as_view(
         actions={"post": "start_analysis"}), name='start-analysis'),
+    path('projects/<int:project_id>/files',
+         DirectoryView.as_view(), name='file-list'),
 
 ]
