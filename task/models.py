@@ -2,6 +2,7 @@ from django.db import models
 from user.models import User
 from project.models import Project
 
+
 class TaskStatus:
     PENDING = 1
     STARTED = 2
@@ -20,21 +21,25 @@ class TaskStatus:
 
 class TaskType:
     MEGAHIT = 1
-    ANNOTATION = 2
- 
+    ANALYSIS = 2
+
     CHOICES = [
         (MEGAHIT, 'MEGAHIT'),
-        (ANNOTATION, 'ANNOTATION'),
+        (ANALYSIS, 'ANALYSIS'),
     ]
+
+
 class Task(models.Model):
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="tasks")
+    user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name="tasks")
     task_id = models.TextField(null=False)
-    type = models.IntegerField(choices=TaskType.CHOICES, null= False)
+    type = models.IntegerField(choices=TaskType.CHOICES, null=False)
     project = models.ForeignKey(
-    Project, on_delete=models.CASCADE, related_name="tasks"
+        Project, on_delete=models.CASCADE, related_name="tasks"
     )
-    status = models.IntegerField(choices=TaskStatus.CHOICES, default=TaskStatus.PENDING)
+    status = models.IntegerField(
+        choices=TaskStatus.CHOICES, default=TaskStatus.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)

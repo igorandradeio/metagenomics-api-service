@@ -21,7 +21,7 @@ jobs:
 
       - name: Copy files to EC2
         run: |
-          rsync -avz --exclude '.git' -e "ssh -o StrictHostKeyChecking=no" . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/api
+          rsync -avz --exclude '.git' --exclude 'database' -e "ssh -o StrictHostKeyChecking=no" . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/api
 
       - name: SSH into EC2 and deploy
         run: |

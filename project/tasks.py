@@ -8,9 +8,10 @@ from utils.remove_directory import remove_assembly_directory
 from utils.remove_work_dir import remove_work_dir
 from task.models import Task, TaskStatus
 from user.models import User
-from project.models import Assembly, Project
+from project.models import Assembly, Project, Analysis
 import logging
 import csv
+import shutil
 
 # Define constants for sequencing read types
 SINGLE_END = 1
@@ -112,14 +113,21 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
 
 
 @shared_task(bind=True)
-def run_annotation(self, project_id, sequencing_read_type, input_files, user_id):
+def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
 
     task_id = self.request.id
     user = User.objects.get(id=user_id)
     project = Project.objects.get(id=project_id)
-    current_dir = os.path.join(
-        "media", "projects", str(project_id), "assembly")
-    output_dir = os.path.join("media", "projects", str(project_id))
+
+    output_dir = os.path.join("media", "projects", str(project_id), "analysis")
+
+    # Remove and recreate the directory
+    try:
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+    except OSError as e:
+        print(f"Error managing directory {output_dir}: {e}")
 
     # Update task status to "STARTED"
     save_task_status(user, task_id, project, TaskStatus.STARTED)
@@ -143,18 +151,28 @@ def run_annotation(self, project_id, sequencing_read_type, input_files, user_id)
         writer.writerow(
             [f"sample_1", "0", file_paths[0], file_paths[1], ""])
 
+    parameters = os.environ.get("ANALYSIS_PARAMETERS")
+    if parameters is None:
+        parameters = []
+    else:
+        parameters = parameters.split()
+
     # Construct the Nextflow command
     nextflow_command = [
         "nextflow", "run", "nf-core/mag",
-        "-r", "3.2.1",
-        "--skip_spades", "--skip_spadeshybrid", "--skip_quast", "--skip_binning",
-        "-profile", "test,apptainer",
+        *parameters,
+        "--input", csv_file_path,
         "--outdir", output_dir,
     ]
 
     try:
         result = subprocess.run(
             nextflow_command, capture_output=True, text=True, check=True)
+
+        analysis = Analysis(
+            project=project,
+        )
+        analysis.save()
 
         # On success, update task status
         save_task_status(user, task_id, project, TaskStatus.SUCCESS)
@@ -192,7 +210,6 @@ def save_task_status(user, task_id, project, status, error_msg=None):
         task = Task.objects.get(
             user=user,
             task_id=task_id,
-            type=1,
             project=project
         )
         # Update the existing task's status
