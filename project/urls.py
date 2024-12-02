@@ -51,7 +51,10 @@ urlpatterns = [
         actions={"post": "start_assembly"}), name='start-assembly'),
     path('projects/<int:pk>/start_annotation/', AnalysisViewSet.as_view(
         actions={"post": "start_analysis"}), name='start-analysis'),
-    path('projects/<int:project_id>/files',
-         DirectoryView.as_view(), name='file-list'),
+    path('projects/<int:project_id>/analysis/view/<path:path>/',
+         DirectoryView.as_view(), name='directory-list-detail'),
+    path('projects/<int:project_id>/analysis/view/',
+         DirectoryView.as_view(), name='directory-list'),
+
 
 ]
