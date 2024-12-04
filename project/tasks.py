@@ -132,8 +132,21 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
     # Update task status to "STARTED"
     save_task_status(user, task_id, project, TaskStatus.STARTED)
 
-    # Construct file paths
-    sample_dir = os.path.join("media", "projects", str(project_id), "sample")
+    parameters = os.environ.get("ANALYSIS_PARAMETERS")
+    if parameters is None:
+        parameters = []
+    else:
+        parameters = parameters.split()
+
+        sample_dir = os.path.join(
+            "media", "projects", str(project_id), "sample")
+
+    # Construct the Nextflow command
+    nextflow_command = [
+        "nextflow", "run", "nf-core/mag",
+        *parameters,
+        "--outdir", output_dir,
+    ]
 
     # Construct the file paths
     file_paths = [
@@ -141,29 +154,42 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
     ]
 
     # Generate the CSV file
-    csv_file_path = os.path.join(sample_dir, "samplesheet.csv")
-    with open(csv_file_path, mode="w", newline="") as csv_file:
-        writer = csv.writer(csv_file)
-        # Write the header
-        writer.writerow(["sample", "group", "short_reads_1",
-                        "short_reads_2", "long_reads"])
-        # Write the data
-        writer.writerow(
-            [f"sample_1", "0", file_paths[0], file_paths[1], ""])
+    input_path = os.path.join(sample_dir, "samplesheet.csv")
 
-    parameters = os.environ.get("ANALYSIS_PARAMETERS")
-    if parameters is None:
-        parameters = []
+    # Construct the command based on the sequencing read type
+    if sequencing_read_type == SINGLE_END:
+
+        with open(input_path, mode="w", newline="") as csv_file:
+            writer = csv.writer(csv_file)
+            # Write the header
+            writer.writerow(["sample", "group", "short_reads_1",
+                            "short_reads_2", "long_reads"])
+            # Write the data
+            writer.writerow(
+                [f"sample_1", "0", file_paths[0], "", ""])
+
+        nextflow_command.extend(["--single_end", "--input", input_path])
+
+    elif sequencing_read_type == PAIRED_END:
+
+        with open(input_path, mode="w", newline="") as csv_file:
+            writer = csv.writer(csv_file)
+            # Write the header
+            writer.writerow(["sample", "group", "short_reads_1",
+                            "short_reads_2", "long_reads"])
+            # Write the data
+            writer.writerow(
+                [f"sample_1", "0", file_paths[0], file_paths[1], ""])
+
+        nextflow_command.extend(["--input", input_path])
+
     else:
-        parameters = parameters.split()
-
-    # Construct the Nextflow command
-    nextflow_command = [
-        "nextflow", "run", "nf-core/mag",
-        *parameters,
-        "--input", csv_file_path,
-        "--outdir", output_dir,
-    ]
+        error_msg = (
+            "Invalid sequencing read type. Use 1 for single-end or 2 for paired-end."
+        )
+        # Sets the task status to "FAILURE"
+        save_task_status(user, task_id, project, TaskStatus.FAILURE, error_msg)
+        raise ValueError(error_msg)
 
     try:
         result = subprocess.run(
