@@ -1,0 +1,7 @@
+.git
+media
+work
+database
+*.log
+*.pyc
+__pycache__
