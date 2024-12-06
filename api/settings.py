@@ -69,6 +69,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "api.middleware.AllowIframeMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = "api.urls"
@@ -188,5 +190,5 @@ LOGGING = {
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
-CELERY_TIMEZONE =  os.environ.get("CELERY_TIMEZONE")
+CELERY_TIMEZONE = os.environ.get("CELERY_TIMEZONE")
 CELERY_TASK_TRACK_STARTED = True
