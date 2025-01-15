@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     default-jre \
     gpg-agent \
-    software-properties-common
+    software-properties-common \
+    mysql-client
 
 RUN add-apt-repository -y ppa:apptainer/ppa
 
