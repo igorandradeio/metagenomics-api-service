@@ -59,6 +59,7 @@ class Sample(models.Model):
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name="samples"
     )
+    pair_id = models.IntegerField(null=True)
     read_orientation = models.IntegerField(
         choices=READ_ORIENTATION_CHOICES, null=True)
 
