@@ -98,7 +98,8 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
         return result.stdout, result.stderr
 
     except subprocess.CalledProcessError as e:
-        error_msg = f"Nextflow pipeline failed with return code {e.returncode}: {e.stderr}"
+        error_msg = f"Nextflow pipeline failed with return code {
+            e.returncode}: {e.stderr}"
         save_task_status(user, task_id, project, TaskStatus.FAILURE, error_msg)
         remove_work_dir(work_dir)
 
@@ -113,11 +114,14 @@ def run_megahit(self, project_id, sequencing_read_type, input_files, user_id, op
 
 
 @shared_task(bind=True)
-def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
+def run_analysis(self, project_id, sequencing_read_type, input_files, user_id, options):
 
     task_id = self.request.id
     user = User.objects.get(id=user_id)
     project = Project.objects.get(id=project_id)
+    k_count, k_min, k_max, k_step = options
+    megahit_options = f"--min-count {k_count} --k-min {
+        k_min} --k-max {k_max} --k-step {k_step}"
 
     output_dir = os.path.join("media", "projects", str(project_id), "analysis")
 
@@ -146,6 +150,7 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
         "nextflow", "run", "nf-core/mag",
         *parameters,
         "--outdir", output_dir,
+        "--megahit_options", f'"{megahit_options}"'
     ]
 
     # Construct the file paths
@@ -192,6 +197,8 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
         raise ValueError(error_msg)
 
     try:
+        print("Comando Nextflow:", " ".join(nextflow_command))
+
         result = subprocess.run(
             nextflow_command, capture_output=True, text=True, check=True)
 
@@ -206,7 +213,8 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id):
         return result.stdout, result.stderr
 
     except subprocess.CalledProcessError as e:
-        error_msg = f"Nextflow pipeline failed with return code {e.returncode}: {e.stderr}"
+        error_msg = f"Nextflow pipeline failed with return code {
+            e.returncode}: {e.stderr}"
         save_task_status(user, task_id, project, TaskStatus.FAILURE, error_msg)
 
         return error_msg

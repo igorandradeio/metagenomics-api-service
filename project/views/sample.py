@@ -34,11 +34,16 @@ class SampleViewSet(ModelViewSet):
             r2 = request.FILES["r2"]
 
             project_id = request.data.get("project")
-            project = get_object_or_404(Project, pk=project_id, user=request.user)
+            project = get_object_or_404(
+                Project, pk=project_id, user=request.user)
 
-            upload_dir = os.path.join("media", "projects", str(project_id), "sample")
+            last_pair = project.samples.order_by("-pair_id").first()
+            next_pair_id = (last_pair.pair_id + 1) if last_pair else 1
 
-            remove_sample_directory(upload_dir, project_id)
+            upload_dir = os.path.join(
+                "media", "projects", str(project_id), "sample")
+
+            # remove_sample_directory(upload_dir, project_id)
             os.makedirs(upload_dir, exist_ok=True)
 
             r1_saved = handle_uploaded_file(r1, project_id, upload_dir)
@@ -50,6 +55,7 @@ class SampleViewSet(ModelViewSet):
                     project=project,
                     file=r1_saved.replace("media/", ""),
                     read_orientation=1,
+                    pair_id=next_pair_id,
                 )
                 sample1.save()
 
@@ -58,6 +64,7 @@ class SampleViewSet(ModelViewSet):
                     project=project,
                     file=r2_saved.replace("media/", ""),
                     read_orientation=2,
+                    pair_id=next_pair_id,
                 )
                 sample2.save()
 
@@ -67,11 +74,13 @@ class SampleViewSet(ModelViewSet):
             file = request.FILES["file"]
 
             project_id = request.data.get("project")
-            project = get_object_or_404(Project, pk=project_id, user=request.user)
+            project = get_object_or_404(
+                Project, pk=project_id, user=request.user)
 
-            upload_dir = os.path.join("media", "projects", str(project_id), "sample")
+            upload_dir = os.path.join(
+                "media", "projects", str(project_id), "sample")
 
-            remove_sample_directory(upload_dir, project_id)
+            # remove_sample_directory(upload_dir, project_id)
             os.makedirs(upload_dir, exist_ok=True)
 
             file_saved = handle_uploaded_file(file, project_id, upload_dir)
