@@ -150,7 +150,7 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id, o
         "nextflow", "run", "nf-core/mag",
         *parameters,
         "--outdir", output_dir,
-        "--megahit_options", f'"{megahit_options}"'
+        "--megahit_options", f'{megahit_options}'
     ]
 
     # Construct the file paths
