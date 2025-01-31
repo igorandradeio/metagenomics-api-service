@@ -8,10 +8,11 @@ from utils.remove_directory import remove_assembly_directory
 from utils.remove_work_dir import remove_work_dir
 from task.models import Task, TaskStatus
 from user.models import User
-from project.models import Assembly, Project, Analysis
+from project.models import Assembly, Project, Analysis, Sample
 import logging
 import csv
 import shutil
+from collections import defaultdict
 
 # Define constants for sequencing read types
 SINGLE_END = 1
@@ -157,34 +158,41 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id, o
     file_paths = [
         os.path.join(sample_dir, file_name) for file_name in input_files
     ]
-
+    print(file_paths)
     # Generate the CSV file
     input_path = os.path.join(sample_dir, "samplesheet.csv")
 
     # Construct the command based on the sequencing read type
-    if sequencing_read_type == SINGLE_END:
+    # if sequencing_read_type == SINGLE_END:
+
+    #     with open(input_path, mode="w", newline="") as csv_file:
+    #         writer = csv.writer(csv_file)
+    #         # Write the header
+    #         writer.writerow(["sample", "group", "short_reads_1",
+    #                         "short_reads_2", "long_reads"])
+    #         # Write the data
+    #         writer.writerow(
+    #             [f"sample_1", "0", file_paths[0], "", ""])
+
+    #     nextflow_command.extend(["--single_end", "--input", input_path])
+
+    if sequencing_read_type == PAIRED_END:
 
         with open(input_path, mode="w", newline="") as csv_file:
             writer = csv.writer(csv_file)
-            # Write the header
             writer.writerow(["sample", "group", "short_reads_1",
                             "short_reads_2", "long_reads"])
-            # Write the data
-            writer.writerow(
-                [f"sample_1", "0", file_paths[0], "", ""])
 
-        nextflow_command.extend(["--single_end", "--input", input_path])
+            samples = Sample.objects.filter(project_id=project_id)
+            grouped_samples = defaultdict(list)
+            for sample in samples:
+                grouped_samples[sample.pair_id].append(sample)
 
-    elif sequencing_read_type == PAIRED_END:
+            for pair_id, sample_pair in grouped_samples.items():
+                sample1, sample2 = sample_pair
 
-        with open(input_path, mode="w", newline="") as csv_file:
-            writer = csv.writer(csv_file)
-            # Write the header
-            writer.writerow(["sample", "group", "short_reads_1",
-                            "short_reads_2", "long_reads"])
-            # Write the data
-            writer.writerow(
-                [f"sample_1", "0", file_paths[0], file_paths[1], ""])
+                writer.writerow(
+                    [f"sample_{pair_id}", "0", f"media/{sample1.file}", f"media/{sample2.file}", ""])
 
         nextflow_command.extend(["--input", input_path])
 
