@@ -87,7 +87,7 @@ class SampleListSerializer(serializers.ModelSerializer):
 class SampleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
-        fields = ["id", "file_name", "read_orientation"]
+        fields = ["id", "file_name"]
 
 
 class SamplePairSerializer(serializers.Serializer):
