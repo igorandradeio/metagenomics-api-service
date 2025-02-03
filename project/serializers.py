@@ -84,6 +84,17 @@ class SampleListSerializer(serializers.ModelSerializer):
         return f"{base_url}/api/samples/{obj.pk}/download/"
 
 
+class SampleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sample
+        fields = ["id", "file_name", "read_orientation"]
+
+
+class SamplePairSerializer(serializers.Serializer):
+    pair_id = serializers.IntegerField()
+    samples = SampleListSerializer(many=True)
+
+
 class AssemblyListSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(
         source="created_at", read_only=True, format="%d-%m-%Y"
@@ -122,12 +133,6 @@ class SampleDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
         fields = ["id", "project", "file"]
-
-
-class SampleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Sample
-        fields = ["id", "file"]
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
