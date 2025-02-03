@@ -8,9 +8,10 @@ from utils.handle_uploaded_file import handle_uploaded_file
 from utils.remove_directory import remove_sample_directory
 
 from project.models import Project, Sample
-from project.serializers import SampleListSerializer
+from project.serializers import SampleListSerializer, SamplePairSerializer
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
+from collections import defaultdict
 
 
 class SampleViewSet(ModelViewSet):
@@ -18,15 +19,49 @@ class SampleViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def samples_by_project(self, request, project_id):
-        project_id = project_id
+        # Get the project object and check if it exists
         project = get_object_or_404(Project, pk=project_id, user=request.user)
-        queryset = project.samples.all()
 
-        if queryset.exists():
-            serializer = SampleListSerializer(queryset, many=True)
-            return Response(serializer.data)
+        # Get the sequencing_read_type_id value from the project
+        sequencing_read_type_id = project.sequencing_read_type_id
+
+        # Filter samples related to the project
+        samples = Sample.objects.filter(project=project)
+
+        if samples.exists():
+            if sequencing_read_type_id == 2:
+                # Current flow: group by pair_id
+                grouped_samples = defaultdict(list)
+                for sample in samples:
+                    grouped_samples[sample.pair_id].append(sample)
+
+                paired_samples = []
+                for sample_pair in grouped_samples.values():
+                    paired_samples.append({
+                        "pair_id": sample_pair[0].pair_id,
+                        "samples": sample_pair
+                    })
+
+                # Serialize the grouped samples and return them
+                serializer = SamplePairSerializer(paired_samples, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            elif sequencing_read_type_id == 1:
+                # New flow: pair_id is null and keep samples in their own array
+                paired_samples = []
+                for sample in samples:
+                    paired_samples.append({
+                        "pair_id": None,
+                        "samples": [sample]
+                    })
+
+                # Serialize the new format and return the data
+                serializer = SamplePairSerializer(paired_samples, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            # If no samples are found
+            return Response({"error": "No samples found for this project."}, status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
         if "r1" in request.FILES and "r2" in request.FILES:
