@@ -162,20 +162,23 @@ def run_analysis(self, project_id, sequencing_read_type, input_files, user_id, o
     input_path = os.path.join(sample_dir, "samplesheet.csv")
 
     # Construct the command based on the sequencing read type
-    # if sequencing_read_type == SINGLE_END:
+    if sequencing_read_type == SINGLE_END:
 
-    #     with open(input_path, mode="w", newline="") as csv_file:
-    #         writer = csv.writer(csv_file)
-    #         # Write the header
-    #         writer.writerow(["sample", "group", "short_reads_1",
-    #                         "short_reads_2", "long_reads"])
-    #         # Write the data
-    #         writer.writerow(
-    #             [f"sample_1", "0", file_paths[0], "", ""])
+        with open(input_path, mode="w", newline="") as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow(["sample", "group", "short_reads_1",
+                            "short_reads_2", "long_reads"])
+            print("entrei")
 
-    #     nextflow_command.extend(["--single_end", "--input", input_path])
+            samples = Sample.objects.filter(project_id=project_id)
+            grouped_samples = defaultdict(list)
+            for sample in samples:
+                writer.writerow(
+                    [f"sample_{sample.id}", "0", f"media/{sample.file}", "", ""])
 
-    if sequencing_read_type == PAIRED_END:
+        nextflow_command.extend(["--single_end", "--input", input_path])
+
+    elif sequencing_read_type == PAIRED_END:
 
         with open(input_path, mode="w", newline="") as csv_file:
             writer = csv.writer(csv_file)
